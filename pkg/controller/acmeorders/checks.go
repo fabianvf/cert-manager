@@ -56,6 +56,7 @@ func handleGenericIssuerFunc(
 }
 
 func ordersForGenericIssuer(iss cmapi.GenericIssuer, orderLister cmacmelisters.OrderLister) ([]*cmacme.Order, error) {
+	// TODO(kcp) we need to scope this request
 	orders, err := orderLister.List(labels.NewSelector())
 
 	if err != nil {
@@ -66,6 +67,9 @@ func ordersForGenericIssuer(iss cmapi.GenericIssuer, orderLister cmacmelisters.O
 
 	var affected []*cmacme.Order
 	for _, o := range orders {
+		if iss.GetClusterName() != o.GetClusterName() {
+			continue
+		}
 		if isClusterIssuer && o.Spec.IssuerRef.Kind != cmapi.ClusterIssuerKind {
 			continue
 		}

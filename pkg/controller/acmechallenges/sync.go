@@ -26,12 +26,14 @@ import (
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/client-go/tools/clusters"
 
 	"github.com/cert-manager/cert-manager/internal/controller/feature"
 	"github.com/cert-manager/cert-manager/pkg/acme"
 	acmecl "github.com/cert-manager/cert-manager/pkg/acme/client"
 	cmacme "github.com/cert-manager/cert-manager/pkg/apis/acme/v1"
 	cmapi "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	acmev1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/acme/v1"
 	controllerpkg "github.com/cert-manager/cert-manager/pkg/controller"
 	dnsutil "github.com/cert-manager/cert-manager/pkg/issuer/acme/dns/util"
 	logf "github.com/cert-manager/cert-manager/pkg/logs"
@@ -65,10 +67,16 @@ func (c *controller) Sync(ctx context.Context, ch *cmacme.Challenge) (err error)
 	log := logf.FromContext(ctx).WithValues("dnsName", ch.Spec.DNSName, "type", ch.Spec.Type)
 	ctx = logf.NewContext(ctx, log)
 
+	clusterName := ch.GetClusterName()
+	ctx = context.WithValue(ctx, "clusterName", clusterName)
+
+	client := acmev1.NewWithCluster(c.cmClient.AcmeV1().RESTClient(), clusterName)
+
 	oldChal := ch
 	ch = ch.DeepCopy()
 
 	if ch.DeletionTimestamp != nil {
+		//TODO(kcp) dig into later
 		return c.handleFinalizer(ctx, ch)
 	}
 
@@ -76,7 +84,8 @@ func (c *controller) Sync(ctx context.Context, ch *cmacme.Challenge) (err error)
 		if apiequality.Semantic.DeepEqual(oldChal.Status, ch.Status) && len(oldChal.Finalizers) == len(ch.Finalizers) {
 			return
 		}
-		_, updateErr := c.cmClient.AcmeV1().Challenges(ch.Namespace).UpdateStatus(ctx, ch, metav1.UpdateOptions{})
+		//TODO(kcp) maybe use dynamic?
+		_, updateErr := client.Challenges(ch.Namespace).UpdateStatus(ctx, ch, metav1.UpdateOptions{})
 		if updateErr != nil {
 			err = utilerrors.NewAggregate([]error{err, updateErr})
 		}
@@ -88,6 +97,7 @@ func (c *controller) Sync(ctx context.Context, ch *cmacme.Challenge) (err error)
 		return nil
 	}
 
+	ch.Spec.IssuerRef.Name = clusters.ToClusterAwareKey(clusterName, ch.Spec.IssuerRef.Name)
 	genericIssuer, err := c.helper.GetGenericIssuer(ch.Spec.IssuerRef, ch.Namespace)
 	if err != nil {
 		return fmt.Errorf("error reading (cluster)issuer %q: %v", ch.Spec.IssuerRef.Name, err)
@@ -243,6 +253,8 @@ func handleError(ch *cmacme.Challenge, err error) error {
 // CleanUp if the resource is in a 'processing' state.
 func (c *controller) handleFinalizer(ctx context.Context, ch *cmacme.Challenge) (err error) {
 	log := logf.FromContext(ctx, "finalizer")
+	clusterName := ch.GetClusterName()
+	client := acmev1.NewWithCluster(c.cmClient.AcmeV1().RESTClient(), clusterName)
 	if len(ch.Finalizers) == 0 {
 		return nil
 	}
@@ -253,14 +265,14 @@ func (c *controller) handleFinalizer(ctx context.Context, ch *cmacme.Challenge) 
 
 	defer func() {
 		// call UpdateStatus first as we may have updated the challenge.status.reason field
-		ch, updateErr := c.cmClient.AcmeV1().Challenges(ch.Namespace).UpdateStatus(ctx, ch, metav1.UpdateOptions{})
+		ch, updateErr := client.Challenges(ch.Namespace).UpdateStatus(ctx, ch, metav1.UpdateOptions{})
 		if updateErr != nil {
 			err = utilerrors.NewAggregate([]error{err, updateErr})
 			return
 		}
 		// call Update to remove the metadata.finalizers entry
 		ch.Finalizers = ch.Finalizers[1:]
-		_, updateErr = c.cmClient.AcmeV1().Challenges(ch.Namespace).Update(ctx, ch, metav1.UpdateOptions{})
+		_, updateErr = client.Challenges(ch.Namespace).Update(ctx, ch, metav1.UpdateOptions{})
 		if updateErr != nil {
 			err = utilerrors.NewAggregate([]error{err, updateErr})
 			return
@@ -271,6 +283,7 @@ func (c *controller) handleFinalizer(ctx context.Context, ch *cmacme.Challenge) 
 		return nil
 	}
 
+	ch.Spec.IssuerRef.Name = clusters.ToClusterAwareKey(clusterName, ch.Spec.IssuerRef.Name)
 	genericIssuer, err := c.helper.GetGenericIssuer(ch.Spec.IssuerRef, ch.Namespace)
 	if err != nil {
 		return fmt.Errorf("error reading (cluster)issuer %q: %v", ch.Spec.IssuerRef.Name, err)
