@@ -17,6 +17,8 @@ limitations under the License.
 package listers
 
 import (
+	"context"
+
 	"k8s.io/apimachinery/pkg/labels"
 
 	cmacme "github.com/cert-manager/cert-manager/pkg/apis/acme/v1"
@@ -65,6 +67,10 @@ func (f *FakeOrderLister) List(selector labels.Selector) (ret []*cmacme.Order, e
 
 func (f *FakeOrderLister) Orders(namespace string) acmelisters.OrderNamespaceLister {
 	return f.OrdersFn(namespace)
+}
+
+func (f *FakeOrderLister) ListWithContext(ctx context.Context, selector labels.Selector) (ret []*cmacme.Order, err error) {
+	return f.ListFn(selector)
 }
 
 func (f *FakeOrderNamespaceLister) List(selector labels.Selector) (ret []*cmacme.Order, err error) {
