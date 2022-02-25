@@ -324,7 +324,7 @@ type contextClients struct {
 // REST config.
 func buildClients(restConfig *rest.Config) (contextClients, error) {
 	// Create a cert-manager api client
-	cmClient, err := clientset.NewForConfig(restConfig)
+	cmClient, err := clientset.NewClusterForConfig(restConfig)
 	if err != nil {
 		return contextClients{}, fmt.Errorf("error creating internal group client: %w", err)
 	}
@@ -362,5 +362,5 @@ func buildClients(restConfig *rest.Config) (contextClients, error) {
 		return contextClients{}, fmt.Errorf("error creating kubernetes client: %w", err)
 	}
 
-	return contextClients{kubeClient, cmClient, gwClient, gatewayAvailable}, nil
+	return contextClients{kubeClient, cmClient.Cluster("*"), gwClient, gatewayAvailable}, nil
 }

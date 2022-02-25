@@ -27,6 +27,7 @@ import (
 
 	cmapi "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cmclient "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned"
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 )
 
 // ApplyStatus will make a Patch API call with the given client to the
@@ -40,7 +41,8 @@ func ApplyStatus(ctx context.Context, cl cmclient.Interface, fieldManager string
 		return err
 	}
 
-	_, err = cl.CertmanagerV1().Certificates(crt.Namespace).Patch(
+	client := certmanagerv1.NewWithCluster(cl.AcmeV1().RESTClient(), ctx.Value("clusterName").(string))
+	_, err = client.Certificates(crt.Namespace).Patch(
 		ctx, crt.Name, apitypes.ApplyPatchType, crtData,
 		metav1.PatchOptions{Force: pointer.Bool(true), FieldManager: fieldManager}, "status",
 	)
