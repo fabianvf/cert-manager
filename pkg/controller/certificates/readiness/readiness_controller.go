@@ -18,6 +18,7 @@ package readiness
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -148,6 +149,9 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	crt, err := c.certificateLister.Certificates(namespace).Get(name)
+	fmt.Println("readiness controller-----", crt.GetClusterName())
+	fmt.Println(crt.GetClusterName())
+	fmt.Println(err)
 
 	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
 
@@ -160,6 +164,8 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	input, err := c.gatherer.DataForCertificate(ctx, crt)
+	fmt.Println("hereeeeeeeee!!!!!!!!!!!!!!!!!!!!!")
+	fmt.Println(input.Certificate, "*******", input.Secret, "***********")
 	if err != nil {
 		return err
 	}

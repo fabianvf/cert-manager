@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -135,6 +136,7 @@ func init() {
 }
 
 func (c *controller) ProcessItem(ctx context.Context, key string) error {
+	fmt.Println("hereee!!!!!!!!!! triggering keymanager controller")
 	log := logf.FromContext(ctx).WithValues("key", key)
 	ctx = logf.NewContext(ctx, log)
 
@@ -145,6 +147,7 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	crt, err := c.certificateLister.Certificates(namespace).Get(name)
+	fmt.Println("certificate name *****************", crt.GetName(), crt.GetClusterName())
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("certificate not found for key", "error", err.Error())
 		return nil
@@ -152,6 +155,8 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	if err != nil {
 		return err
 	}
+
+	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
 
 	// Discover all 'owned' secrets that have the `next-private-key` label
 	secrets, err := certificates.ListSecretsMatchingPredicates(c.secretLister.Secrets(crt.Namespace), isNextPrivateKeyLabelSelector, predicate.ResourceOwnedBy(crt))
@@ -264,6 +269,7 @@ func (c *controller) createNextPrivateKeyRotationPolicyNever(ctx context.Context
 	}
 
 	nextPkSecret, err := c.createNewPrivateKeySecret(ctx, crt, pk)
+	fmt.Println("creating a new secret in cluster", crt.GetClusterName())
 	if err != nil {
 		return err
 	}
@@ -292,6 +298,8 @@ func (c *controller) createAndSetNextPrivateKey(ctx context.Context, crt *cmapi.
 // deleteSecretResources will delete the given secret resources
 func (c *controller) deleteSecretResources(ctx context.Context, secrets []*corev1.Secret) error {
 	log := logf.FromContext(ctx)
+
+	// client := corev1client.NewWithCluster(c.coreClient.CoreV1().RESTClient(), ctx.Value("clusterName").(string))
 	for _, s := range secrets {
 		if err := c.coreClient.CoreV1().Secrets(s.Namespace).Delete(ctx, s.Name, metav1.DeleteOptions{}); err != nil {
 			return err
@@ -326,7 +334,8 @@ func (c *controller) updateOrApplyStatus(ctx context.Context, crt *cmapi.Certifi
 			Status:     cmapi.CertificateStatus{NextPrivateKeySecretName: crt.Status.NextPrivateKeySecretName},
 		})
 	} else {
-		_, err := c.client.CertmanagerV1().Certificates(crt.Namespace).UpdateStatus(ctx, crt, metav1.UpdateOptions{})
+		cl := certmanagerv1.NewWithCluster(c.client.AcmeV1().RESTClient(), ctx.Value("clusterName").(string))
+		_, err := cl.Certificates(crt.Namespace).UpdateStatus(ctx, crt, metav1.UpdateOptions{})
 		return err
 	}
 }
@@ -344,10 +353,13 @@ func (c *controller) createNewPrivateKeySecret(ctx context.Context, crt *cmapi.C
 		return nil, err
 	}
 
+	fmt.Println("********************", crt.GetClusterName(), "*****************")
+
 	s := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:       crt.Namespace,
 			Name:            name,
+			ClusterName:     crt.GetClusterName(),
 			OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(crt, certificateGvk)},
 			Labels: map[string]string{
 				"cert-manager.io/next-private-key": "true",

@@ -79,6 +79,8 @@ type Context struct {
 	RESTConfig *rest.Config
 	// Client is a Kubernetes clientset
 	Client kubernetes.Interface
+	// Cluster is a Kubernetes cluster interface
+	Cluster clientset.Cluster
 	// CMClient is a cert-manager clientset
 	CMClient clientset.Interface
 	// GWClient is a GatewayAPI clientset.
@@ -316,6 +318,7 @@ func (c *ContextFactory) Build(component ...string) (*Context, error) {
 type contextClients struct {
 	kubeClient       kubernetes.Interface
 	cmClient         clientset.Interface
+	cluster          clientset.Cluster
 	gwClient         gwclient.Interface
 	gatewayAvailable bool
 }
@@ -362,5 +365,5 @@ func buildClients(restConfig *rest.Config) (contextClients, error) {
 		return contextClients{}, fmt.Errorf("error creating kubernetes client: %w", err)
 	}
 
-	return contextClients{kubeClient, cmClient.Cluster("*"), gwClient, gatewayAvailable}, nil
+	return contextClients{kubeClient, cmClient.Cluster("*"), *cmClient, gwClient, gatewayAvailable}, nil
 }
