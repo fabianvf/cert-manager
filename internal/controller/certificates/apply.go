@@ -41,7 +41,7 @@ func ApplyStatus(ctx context.Context, cl cmclient.Interface, fieldManager string
 		return err
 	}
 
-	client := certmanagerv1.NewWithCluster(cl.AcmeV1().RESTClient(), ctx.Value("clusterName").(string))
+	client := certmanagerv1.NewWithCluster(cl.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
 	_, err = client.Certificates(crt.Namespace).Patch(
 		ctx, crt.Name, apitypes.ApplyPatchType, crtData,
 		metav1.PatchOptions{Force: pointer.Bool(true), FieldManager: fieldManager}, "status",

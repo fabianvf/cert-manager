@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
+	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -299,9 +300,9 @@ func (c *controller) createAndSetNextPrivateKey(ctx context.Context, crt *cmapi.
 func (c *controller) deleteSecretResources(ctx context.Context, secrets []*corev1.Secret) error {
 	log := logf.FromContext(ctx)
 
-	// client := corev1client.NewWithCluster(c.coreClient.CoreV1().RESTClient(), ctx.Value("clusterName").(string))
+	client := corev1client.NewWithCluster(c.coreClient.CoreV1().RESTClient(), ctx.Value("clusterName").(string))
 	for _, s := range secrets {
-		if err := c.coreClient.CoreV1().Secrets(s.Namespace).Delete(ctx, s.Name, metav1.DeleteOptions{}); err != nil {
+		if err := client.Secrets(s.Namespace).Delete(ctx, s.Name, metav1.DeleteOptions{}); err != nil {
 			return err
 		}
 		logf.WithRelatedResource(log, s).V(logf.DebugLevel).Info("Deleted 'next private key' Secret resource")
@@ -334,7 +335,7 @@ func (c *controller) updateOrApplyStatus(ctx context.Context, crt *cmapi.Certifi
 			Status:     cmapi.CertificateStatus{NextPrivateKeySecretName: crt.Status.NextPrivateKeySecretName},
 		})
 	} else {
-		cl := certmanagerv1.NewWithCluster(c.client.AcmeV1().RESTClient(), ctx.Value("clusterName").(string))
+		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
 		_, err := cl.Certificates(crt.Namespace).UpdateStatus(ctx, crt, metav1.UpdateOptions{})
 		return err
 	}
@@ -373,7 +374,10 @@ func (c *controller) createNewPrivateKeySecret(ctx context.Context, crt *cmapi.C
 		// TODO: handle certificate resources that have especially long names
 		s.GenerateName = crt.Name + "-"
 	}
-	s, err = c.coreClient.CoreV1().Secrets(s.Namespace).Create(ctx, s, metav1.CreateOptions{})
+
+	fmt.Println("here while creating secret &&&&&&&&&&&&&", crt.GetClusterName())
+	cl := corev1client.NewWithCluster(c.coreClient.CoreV1().RESTClient(), crt.GetClusterName())
+	s, err = cl.Secrets(s.Namespace).Create(ctx, s, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
