@@ -365,5 +365,5 @@ func buildClients(restConfig *rest.Config) (contextClients, error) {
 		return contextClients{}, fmt.Errorf("error creating kubernetes client: %w", err)
 	}
 
-	return contextClients{kubeClient.Cluster("admin"), cmClient.Cluster("*"), *cmClient, gwClient, gatewayAvailable}, nil
+	return contextClients{kubeClient.Cluster("*"), cmClient.Cluster("*"), *cmClient, gwClient, gatewayAvailable}, nil
 }
