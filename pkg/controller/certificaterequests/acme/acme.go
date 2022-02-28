@@ -132,7 +132,9 @@ func (a *ACME) Sign(ctx context.Context, cr *cmapi.CertificateRequest, issuer cm
 	if k8sErrors.IsNotFound(err) {
 		// Failing to create the order here is most likely network related.
 		// We should backoff and keep trying.
-		_, err = a.acmeClientV.Orders(expectedOrder.Namespace).Create(ctx, expectedOrder, metav1.CreateOptions{})
+		// create order in the same cluster as the certificate request.
+		cl := cmacmeclientset.NewWithCluster(a.acmeClientV.RESTClient(), expectedOrder.GetClusterName())
+		_, err = cl.Orders(expectedOrder.Namespace).Create(ctx, expectedOrder, metav1.CreateOptions{})
 		if err != nil {
 			message := fmt.Sprintf("Failed create new order resource %s/%s", expectedOrder.Namespace, expectedOrder.Name)
 
@@ -201,12 +203,15 @@ func (a *ACME) Sign(ctx context.Context, cr *cmapi.CertificateRequest, issuer cm
 	x509Cert, err := pki.DecodeX509CertificateBytes(order.Status.Certificate)
 	if err != nil {
 		log.Error(err, "failed to decode x509 certificate data on Order resource.")
-		return nil, a.acmeClientV.Orders(order.Namespace).Delete(ctx, order.Name, metav1.DeleteOptions{})
+		// Expecting the created order to be in the same cluster as the certificate request.
+		cl := cmacmeclientset.NewWithCluster(a.acmeClientV.RESTClient(), expectedOrder.GetClusterName())
+		return nil, cl.Orders(order.Namespace).Delete(ctx, order.Name, metav1.DeleteOptions{})
 	}
 
 	if ok, err := pki.PublicKeyMatchesCertificate(csr.PublicKey, x509Cert); err != nil || !ok {
 		log.Error(err, "The public key in Order.Status.Certificate does not match the public key in CertificateRequest.Spec.Request. Deleting the order.")
-		return nil, a.acmeClientV.Orders(order.Namespace).Delete(ctx, order.Name, metav1.DeleteOptions{})
+		cl := cmacmeclientset.NewWithCluster(a.acmeClientV.RESTClient(), expectedOrder.GetClusterName())
+		return nil, cl.Orders(order.Namespace).Delete(ctx, order.Name, metav1.DeleteOptions{})
 	}
 
 	log.V(logf.InfoLevel).Info("certificate issued")
@@ -267,11 +272,13 @@ func buildOrder(cr *cmapi.CertificateRequest, csr *x509.CertificateRequest, enab
 	// truncate certificate name so final name will be <= 63 characters.
 	// hash (uint32) will be at most 10 digits long, and we account for
 	// the hyphen.
+	// Add clusterName to the expected order from certificate request
 	return &cmacme.Order{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: cr.Namespace,
-			Labels:    cr.Labels,
+			Name:        name,
+			Namespace:   cr.Namespace,
+			ClusterName: cr.ClusterName,
+			Labels:      cr.Labels,
 			// Annotations include the filtered annotations copied from the Certificate.
 			Annotations: cr.Annotations,
 			OwnerReferences: []metav1.OwnerReference{
