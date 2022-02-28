@@ -236,7 +236,6 @@ func (o *Options) Run(ctx context.Context, args []string) error {
 	if ns == "" {
 		ns = o.Namespace
 	}
-	fmt.Println("creating certificate request here")
 	req, err = o.CMClient.CertmanagerV1().CertificateRequests(ns).Create(ctx, req, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("error creating CertificateRequest: %w", err)

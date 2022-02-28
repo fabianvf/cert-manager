@@ -242,13 +242,8 @@ type Gatherer struct {
 func (g *Gatherer) DataForCertificate(ctx context.Context, crt *cmapi.Certificate) (Input, error) {
 	log := logf.FromContext(ctx)
 	// Attempt to fetch the Secret being managed but tolerate NotFound errors.
-	fmt.Println("finding dataForCertificate****", crt.GetClusterName())
 	secret, err := g.SecretLister.Secrets(crt.Namespace).Get(crt.Spec.SecretName)
-	if apierrors.IsNotFound(err) {
-		fmt.Println("not founddd")
-	}
 	if err != nil && !apierrors.IsNotFound(err) {
-		fmt.Println("secret not found", crt.Spec.SecretName)
 		return Input{}, err
 	}
 
@@ -317,7 +312,6 @@ func (g *Gatherer) DataForCertificate(ctx context.Context, crt *cmapi.Certificat
 		log.V(logf.DebugLevel).Info("Found no CertificateRequest resources owned by this Certificate for the next revision", "revision", nextCRRevision)
 	}
 
-	fmt.Println("here returning input data", crt.GetClusterName())
 	return Input{
 		Certificate:            crt,
 		Secret:                 secret,

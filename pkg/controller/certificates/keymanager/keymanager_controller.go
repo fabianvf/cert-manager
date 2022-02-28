@@ -137,7 +137,6 @@ func init() {
 }
 
 func (c *controller) ProcessItem(ctx context.Context, key string) error {
-	fmt.Println("hereee!!!!!!!!!! triggering keymanager controller")
 	log := logf.FromContext(ctx).WithValues("key", key)
 	ctx = logf.NewContext(ctx, log)
 
@@ -148,7 +147,6 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	crt, err := c.certificateLister.Certificates(namespace).Get(name)
-	fmt.Println("certificate name *****************", crt.GetName(), crt.GetClusterName())
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("certificate not found for key", "error", err.Error())
 		return nil
@@ -270,7 +268,6 @@ func (c *controller) createNextPrivateKeyRotationPolicyNever(ctx context.Context
 	}
 
 	nextPkSecret, err := c.createNewPrivateKeySecret(ctx, crt, pk)
-	fmt.Println("creating a new secret in cluster", crt.GetClusterName())
 	if err != nil {
 		return err
 	}
@@ -354,8 +351,6 @@ func (c *controller) createNewPrivateKeySecret(ctx context.Context, crt *cmapi.C
 		return nil, err
 	}
 
-	fmt.Println("********************", crt.GetClusterName(), "*****************")
-
 	s := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:       crt.Namespace,
@@ -375,7 +370,6 @@ func (c *controller) createNewPrivateKeySecret(ctx context.Context, crt *cmapi.C
 		s.GenerateName = crt.Name + "-"
 	}
 
-	fmt.Println("here while creating secret &&&&&&&&&&&&&", crt.GetClusterName())
 	cl := corev1client.NewWithCluster(c.coreClient.CoreV1().RESTClient(), crt.GetClusterName())
 	s, err = cl.Secrets(s.Namespace).Create(ctx, s, metav1.CreateOptions{})
 	if err != nil {

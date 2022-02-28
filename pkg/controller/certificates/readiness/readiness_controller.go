@@ -18,7 +18,6 @@ package readiness
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -149,12 +148,6 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	crt, err := c.certificateLister.Certificates(namespace).Get(name)
-	fmt.Println("readiness controller-----", crt.GetClusterName())
-	fmt.Println(crt.GetClusterName())
-	fmt.Println(err)
-
-	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
-
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("certificate not found for key", "error", err.Error())
 		return nil
@@ -163,9 +156,9 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		return err
 	}
 
+	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
+
 	input, err := c.gatherer.DataForCertificate(ctx, crt)
-	fmt.Println("hereeeeeeeee!!!!!!!!!!!!!!!!!!!!!")
-	fmt.Println(input.Certificate, "*******", input.Secret, "***********")
 	if err != nil {
 		return err
 	}

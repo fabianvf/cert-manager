@@ -64,6 +64,7 @@ const resyncPeriod = 10 * time.Hour
 // Each component should be given distinct Contexts, built from the
 // ContextFactory that has configured the underlying client to use separate
 // User Agents.
+// TODO(kcp): Pass cluster interface for certmanager and k8s client
 type Context struct {
 	// RootContext is the root context for the controller
 	RootContext context.Context
@@ -79,8 +80,6 @@ type Context struct {
 	RESTConfig *rest.Config
 	// Client is a Kubernetes clientset
 	Client kubernetes.Interface
-	// Cluster is a Kubernetes cluster interface
-	Cluster clientset.Cluster
 	// CMClient is a cert-manager clientset
 	CMClient clientset.Interface
 	// GWClient is a GatewayAPI clientset.
@@ -315,10 +314,10 @@ func (c *ContextFactory) Build(component ...string) (*Context, error) {
 }
 
 // contextClients is a helper struct containing API clients.
+// TODO(kcp): Propagate cluster interfaces here too.
 type contextClients struct {
 	kubeClient       kubernetes.Interface
 	cmClient         clientset.Interface
-	cluster          clientset.Cluster
 	gwClient         gwclient.Interface
 	gatewayAvailable bool
 }
@@ -365,5 +364,6 @@ func buildClients(restConfig *rest.Config) (contextClients, error) {
 		return contextClients{}, fmt.Errorf("error creating kubernetes client: %w", err)
 	}
 
-	return contextClients{kubeClient.Cluster("*"), cmClient.Cluster("*"), *cmClient, gwClient, gatewayAvailable}, nil
+	// TODO(kcp): Verify if gateway client needs to be scoped
+	return contextClients{kubeClient.Cluster("*"), cmClient.Cluster("*"), gwClient, gatewayAvailable}, nil
 }

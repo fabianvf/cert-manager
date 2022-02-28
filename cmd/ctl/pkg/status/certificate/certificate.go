@@ -151,7 +151,6 @@ func (o *Options) GetResources(ctx context.Context, crtName string) (*Data, erro
 		return nil, err
 	}
 
-	fmt.Println("getting certificate events")
 	// If no events found, crtEvents would be nil and handled down the line in DescribeEvents
 	crtEvents, err := clientSet.CoreV1().Events(crt.Namespace).Search(ctl.Scheme, crtRef)
 	if err != nil {

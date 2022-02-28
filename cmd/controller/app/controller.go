@@ -336,6 +336,7 @@ func startLeaderElection(ctx context.Context, opts *options.ControllerOptions, l
 		Identity:      id + "-external-cert-manager-controller",
 		EventRecorder: recorder,
 	}
+	// TODO(kcp): Hardcoded to admin cluster for now. Figure out what is to be done later.
 	corev1cl := corev1client.NewWithCluster(leaderElectionClient.CoreV1().RESTClient(), "admin")
 	coordinationv1cl := coordinationv1.NewWithCluster(leaderElectionClient.CoordinationV1().RESTClient(), "admin")
 	ml, err := resourcelock.New(resourcelock.ConfigMapsLeasesResourceLock,
