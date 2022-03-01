@@ -35,6 +35,7 @@ import (
 	cmapi "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 	cmclient "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned"
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 	cminformers "github.com/cert-manager/cert-manager/pkg/client/informers/externalversions"
 	cmlisters "github.com/cert-manager/cert-manager/pkg/client/listers/certmanager/v1"
 	controllerpkg "github.com/cert-manager/cert-manager/pkg/controller"
@@ -110,6 +111,8 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		return err
 	}
 
+	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
+
 	log = logf.WithResource(log, crt)
 
 	// If RevisionHistoryLimit is nil, don't attempt to garbage collect old
@@ -140,7 +143,8 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	for _, req := range toDelete {
 		logf.WithRelatedResourceName(log, req.Name, req.Namespace, cmapi.CertificateRequestKind).
 			WithValues("revision", req.rev).Info("garbage collecting old certificate request revsion")
-		err = c.client.CertmanagerV1().CertificateRequests(req.Namespace).Delete(ctx, req.Name, metav1.DeleteOptions{})
+		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+		err = cl.CertificateRequests(req.Namespace).Delete(ctx, req.Name, metav1.DeleteOptions{})
 		if apierrors.IsNotFound(err) {
 			continue
 		}
