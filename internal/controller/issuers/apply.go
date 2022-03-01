@@ -64,7 +64,8 @@ func ApplyClusterIssuerStatus(ctx context.Context, cl cmclient.Interface, fieldM
 		return err
 	}
 
-	_, err = cl.CertmanagerV1().ClusterIssuers().Patch(
+	client := certmanagerv1.NewWithCluster(cl.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+	_, err = client.ClusterIssuers().Patch(
 		ctx, issuer.Name, apitypes.ApplyPatchType, issuerData,
 		metav1.PatchOptions{Force: pointer.Bool(true), FieldManager: fieldManager}, "status",
 	)
