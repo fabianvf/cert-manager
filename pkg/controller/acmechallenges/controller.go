@@ -20,6 +20,7 @@ import (
 	"context"
 	"time"
 
+	acmev1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/acme/v1"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -183,7 +184,10 @@ func (c *controller) runScheduler(ctx context.Context) {
 		ch = ch.DeepCopy()
 		ch.Status.Processing = true
 
-		_, err := c.cmClient.AcmeV1().Challenges(ch.Namespace).UpdateStatus(ctx, ch, metav1.UpdateOptions{})
+		// pass the cluster name from the challenge while updating status
+		client := acmev1.NewWithCluster(c.cmClient.AcmeV1().RESTClient(), ch.GetClusterName())
+
+		_, err := client.Challenges(ch.Namespace).UpdateStatus(ctx, ch, metav1.UpdateOptions{})
 		if err != nil {
 			log.Error(err, "error scheduling challenge for processing")
 			return
@@ -206,6 +210,8 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	ch, err := c.challengeLister.Challenges(namespace).Get(name)
+
+	ctx = context.WithValue(ctx, "clusterName", ch.GetClusterName())
 
 	if err != nil {
 		if k8sErrors.IsNotFound(err) {
