@@ -46,7 +46,6 @@ func (c *controller) Sync(ctx context.Context, iss *cmapi.Issuer) (err error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	ctx = context.WithValue(ctx, "clusterName", iss.GetClusterName())
 	issuerCopy := iss.DeepCopy()
 	defer func() {
 		if saveErr := c.updateIssuerStatus(ctx, iss, issuerCopy); saveErr != nil {
