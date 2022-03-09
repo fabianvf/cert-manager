@@ -67,10 +67,7 @@ func (c *controller) Sync(ctx context.Context, ch *cmacme.Challenge) (err error)
 	log := logf.FromContext(ctx).WithValues("dnsName", ch.Spec.DNSName, "type", ch.Spec.Type)
 	ctx = logf.NewContext(ctx, log)
 
-	clusterName := ch.GetClusterName()
-	ctx = context.WithValue(ctx, "clusterName", clusterName)
-
-	client := acmev1.NewWithCluster(c.cmClient.AcmeV1().RESTClient(), clusterName)
+	client := acmev1.NewWithCluster(c.cmClient.AcmeV1().RESTClient(), ctx.Value("clusterName").(string))
 
 	oldChal := ch
 	ch = ch.DeepCopy()
@@ -97,7 +94,7 @@ func (c *controller) Sync(ctx context.Context, ch *cmacme.Challenge) (err error)
 		return nil
 	}
 
-	ch.Spec.IssuerRef.Name = clusters.ToClusterAwareKey(clusterName, ch.Spec.IssuerRef.Name)
+	ch.Spec.IssuerRef.Name = clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), ch.Spec.IssuerRef.Name)
 	genericIssuer, err := c.helper.GetGenericIssuer(ch.Spec.IssuerRef, ch.Namespace)
 	if err != nil {
 		return fmt.Errorf("error reading (cluster)issuer %q: %v", ch.Spec.IssuerRef.Name, err)

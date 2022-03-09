@@ -18,7 +18,6 @@ package trigger
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -146,11 +145,6 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	crt, err := c.certificateLister.Certificates(namespace).Get(name)
-	fmt.Println("clusterName of the returned certificate")
-	fmt.Println(crt.GetClusterName())
-
-	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
-
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("certificate not found for key", "error", err.Error())
 		return nil
@@ -158,6 +152,9 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	if err != nil {
 		return err
 	}
+
+	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
+
 	if apiutil.CertificateHasCondition(crt, cmapi.CertificateCondition{
 		Type:   cmapi.CertificateConditionIssuing,
 		Status: cmmeta.ConditionTrue,
@@ -211,6 +208,7 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 // updateOrApplyStatus will update the controller status. If the
 // ServerSideApply feature is enabled, the managed fields will instead get
 // applied using the relevant Patch API call.
+// TODO(kcp): modify the client calls to cluster instead
 func (c *controller) updateOrApplyStatus(ctx context.Context, crt *cmapi.Certificate) error {
 	if utilfeature.DefaultFeatureGate.Enabled(feature.ServerSideApply) {
 		var conditions []cmapi.CertificateCondition
@@ -222,7 +220,7 @@ func (c *controller) updateOrApplyStatus(ctx context.Context, crt *cmapi.Certifi
 			Status:     cmapi.CertificateStatus{Conditions: conditions},
 		})
 	} else {
-		cl := certmanagerv1.NewWithCluster(c.client.AcmeV1().RESTClient(), ctx.Value("clusterName").(string))
+		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
 		_, err := cl.Certificates(crt.Namespace).UpdateStatus(ctx, crt, metav1.UpdateOptions{})
 		return err
 	}

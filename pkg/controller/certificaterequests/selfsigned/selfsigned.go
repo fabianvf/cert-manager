@@ -80,6 +80,9 @@ func NewSelfSigned(ctx *controllerpkg.Context) certificaterequests.Issuer {
 func (s *SelfSigned) Sign(ctx context.Context, cr *cmapi.CertificateRequest, issuerObj cmapi.GenericIssuer) (*issuer.IssueResponse, error) {
 	log := logf.FromContext(ctx, "sign")
 
+	// Though client calls aren't being made, scoping the context for future use.
+	ctx = context.WithValue(ctx, "clusterName", cr.GetClusterName())
+
 	resourceNamespace := s.issuerOptions.ResourceNamespace(issuerObj)
 
 	secretName, ok := cr.ObjectMeta.Annotations[cmapi.CertificateRequestPrivateKeyAnnotationKey]

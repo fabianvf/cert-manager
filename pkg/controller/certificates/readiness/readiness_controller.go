@@ -148,9 +148,6 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	crt, err := c.certificateLister.Certificates(namespace).Get(name)
-
-	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
-
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("certificate not found for key", "error", err.Error())
 		return nil
@@ -158,6 +155,8 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	if err != nil {
 		return err
 	}
+
+	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
 
 	input, err := c.gatherer.DataForCertificate(ctx, crt)
 	if err != nil {
@@ -224,7 +223,7 @@ func (c *controller) updateOrApplyStatus(ctx context.Context, crt *cmapi.Certifi
 			},
 		})
 	} else {
-		cl := certmanagerv1.NewWithCluster(c.client.AcmeV1().RESTClient(), ctx.Value("clusterName").(string))
+		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
 		_, err := cl.Certificates(crt.Namespace).UpdateStatus(ctx, crt, metav1.UpdateOptions{})
 		return err
 	}

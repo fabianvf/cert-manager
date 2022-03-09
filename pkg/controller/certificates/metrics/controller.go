@@ -100,6 +100,8 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		return err
 	}
 
+	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
+
 	// Update that Certificates metrics
 	c.metrics.UpdateCertificate(ctx, crt)
 
