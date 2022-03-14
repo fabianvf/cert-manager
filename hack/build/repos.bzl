@@ -4187,8 +4187,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/api",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/api",
-        sum = "h1:EDBvzyIDG3Tw1A5cC6M/INW5sVtGvrvQhsl4FT7Eg8U=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:PLnH4LdcXWG7xa9ibxPu+TwN0loypatEwxIVf3hZ6VM=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4197,8 +4197,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/apiextensions-apiserver",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/apiextensions-apiserver",
-        sum = "h1:nTJvfkqtrRxVpmvgLlc0EimP8JVwkj0VDqfHK/P3kMc=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:VAiw6xyzLVh3BMh3T6LrOWUgf+yCX5SdQXvLSBuWXPs=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4207,8 +4207,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/apimachinery",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/apimachinery",
-        sum = "h1:Rkr6C34mxT557Q9rfYOgQdzbbLWpSr6/q67mqLRfs/A=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:TAY/bgKod+HSf8SwTaMAVl9pXEv4O4l35jv4+taZ8Vc=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4217,8 +4217,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/apiserver",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/apiserver",
-        sum = "h1:gl1TunbPAJPzNULFaMDgk+8JKidY7f9D5PHK0MNxcfI=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:cyjGit5OYpc66OP6r9DLjON769blUpqFG6Cg9XP6yuw=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4227,8 +4227,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/cli-runtime",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/cli-runtime",
-        sum = "h1:APYrAypoi0lvCAO06e7rJnEgdZswRmADL569TUNtMs8=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:bFUP25HLczdC+MPB+cEkHCkmE4LDE2FhvXBP1Jb3hzU=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4237,8 +4237,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/client-go",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/client-go",
-        sum = "h1:llZk+gryUHUCF5YwWEyUw1V3FR6QLN2hg3MulElaGbQ=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:hAdtm1NMBk4XxlX0zS1Rjsrsy28Jq64Qa2By6kMj2gI=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_cloud_provider",
@@ -4246,8 +4246,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/cloud-provider",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/cloud-provider",
-        sum = "h1:oDD0STcj6c0xde7tltdr/93aIEipPPjIwFZRnja6Y88=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:UksIMw5+xHjwhlZGnxmNY+wHvQ+Vku1xMvMPtBUAgzM=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_cluster_bootstrap",
@@ -4255,8 +4255,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/cluster-bootstrap",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/cluster-bootstrap",
-        sum = "h1:3PYaElNMhQPKu8WPUrF7uVe5hfdKgLWFctUWvg8aaro=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:Ii5ukU2zI9gsnuiQpVkE2XURea5GUUAMht6VU2oLTso=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4265,8 +4265,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/code-generator",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/code-generator",
-        sum = "h1:r0x2uYY535o+PHU+wesFft6872rvk9r5scLAZ5dWhec=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:/zJ9JDOoYdD0RYJ7+T3WfjgftqovofYuybaMvrZ61VQ=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4275,8 +4275,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/component-base",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/component-base",
-        sum = "h1:jHMsqy21DKAuYzSOghVk2qEmGFPyiZnnKpYMgYQmIpk=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:P3n6fJtwx3PItExz9G4uW/32MriGaGYWXbT5BGo2jc4=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4285,8 +4285,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/component-helpers",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/component-helpers",
-        sum = "h1:U/QypHbPwaMB1e+kV/RdS6YqpKjyifun9UuCLWKVpMI=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:fRDSMNLfQjvlzTjSQhzoIsMlaIn2vqKDN3Q/s3KuJN0=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_controller_manager",
@@ -4294,8 +4294,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/controller-manager",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/controller-manager",
-        sum = "h1:rNuD7WxhtmlKJjSYn59kS6Z26n4SJDEyJiWHNpjokBU=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:x24XKiOx5gXMp6VbYwVobvL8bIs6XPnU9R6oi54nssQ=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4304,8 +4304,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/cri-api",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/cri-api",
-        sum = "h1:Ljyhe3dY30t7X+AbACSlTfM+G9JFNj9sJSLLe8bay2o=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:WC1P2zb+TuyyEwN/JkQcq5cpswztfmaiMpWlTsYK6/U=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_csi_translation_lib",
@@ -4313,8 +4313,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/csi-translation-lib",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/csi-translation-lib",
-        sum = "h1:fZmlDiJyc2BuRPq3OsocxP3EueBbXG6TE40MFV0VV2o=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:p5WJYhLblSB5+GBexDthnNP8AZRx5UEf7VCQlBkbSkM=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4351,8 +4351,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/kube-aggregator",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/kube-aggregator",
-        sum = "h1:Z6ydamongFUlWYjT5V6XgDWebjrdhLyJSI+SsB2hAOs=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:P2f2zmUMNoQn/OnJ1tieshcT59u8T9Bq2o6/FeYMPqI=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_kube_controller_manager",
@@ -4360,8 +4360,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/kube-controller-manager",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/kube-controller-manager",
-        sum = "h1:I9K7BnQ6soWcasM/X3jCrd71TGN9AvrOuCYBIVM0zFw=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:ifp1Rasoe5+zu0OLTmGkrQ9C7162qFRtIVPjFWffukc=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4378,8 +4378,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/kube-proxy",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/kube-proxy",
-        sum = "h1:Bqo2BbDDFRgcxJ4saRvjfk1NLGSmmLa2cXEwlQdwpxc=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:R+8FazVGIGuDLg/TAGEX7YA8ktnWDcIRgzTY9VLRymg=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_kube_scheduler",
@@ -4387,8 +4387,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/kube-scheduler",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/kube-scheduler",
-        sum = "h1:5TR/jVOXLoGWffvYHW5plr6DGo2IIGyo4PmJX2+LTG0=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:FqRTHCYXUzKNHOSQDVGJ2ujkuUOpWCAPVUZzYqtyvd8=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4397,8 +4397,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/kubectl",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/kubectl",
-        sum = "h1:mGwaiq/+dDv/eUAn0ji7W2FpYI0IZQd1L/klvy0pwFw=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:TdCYt6tFWAWcyzThSy4CLRWyRz8k+tQFpaJ/jiu4D3I=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_kubelet",
@@ -4406,8 +4406,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/kubelet",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/kubelet",
-        sum = "h1:ztMxWvZMEILoNbe0AVMoM0OqMva97D6qhr62j8rT99Y=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:kCywJL46RDwG/+GT8WzS0Rqu/Pqtd850Ked1M86bavY=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4424,8 +4424,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/legacy-cloud-providers",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/legacy-cloud-providers",
-        sum = "h1:tikGK070CMhaEKybF7G7AnkY38ab3/UTjTvFV77zQDM=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:kc33neAGscAIO1JUwa+i4gdXHTMj25EtnWjbgG5ikuE=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4434,8 +4434,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/metrics",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/metrics",
-        sum = "h1:AGCWLBxvxwfESmey+QzjUFeDlOFI31DhgvZMesSPhjQ=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:BTvXImARCByrLdGUaNsJIJdt+zyRhYIEprE4dYtJgGc=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_mount_utils",
@@ -4443,8 +4443,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/mount-utils",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/mount-utils",
-        sum = "h1:XxFmow8vjmYbGVXh9/082JR1M3at2pE1BBisj9XhTb0=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:M0lKaLikFF49C6Mwrtw6c4W4YMTgvlEXtZY9fo2VqzA=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_pod_security_admission",
@@ -4452,8 +4452,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/pod-security-admission",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/pod-security-admission",
-        sum = "h1:5eg1NqiGaS/c1M/laB2BMkMMda4RwR0FUrbyq/i9AaM=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:yw+Czn9kg2mHCmtl78orkyRfev5CkGpQOum1M+Ktuck=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
     go_repository(
         name = "io_k8s_sample_apiserver",
@@ -4461,8 +4461,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "k8s.io/sample-apiserver",
         replace = "github.com/kcp-dev/kubernetes/staging/src/k8s.io/sample-apiserver",
-        sum = "h1:fFTj+tpq0NRngpGTpDLZV5TgltfLafwci2NGMuacpNA=",
-        version = "v0.0.0-20220221152651-2142bb4b2caf",
+        sum = "h1:MoVZv6fyw1GvDnTtoDnRgWeop8P82b47cVg4GlBlF/0=",
+        version = "v0.0.0-20220311170911-10415751c5a9",
     )
 
     go_repository(
@@ -4480,8 +4480,8 @@ def go_repositories():
         build_file_proto_mode = "disable",
         importpath = "sigs.k8s.io/controller-runtime",
         replace = "github.com/fabianvf/controller-runtime",
-        sum = "h1:ZntDfGyOcsg2716E2bYdBUVxNUGdnn0OPDP7k9llfPg=",
-        version = "v0.2.0-beta.1.0.20220214203144-4a14c9ca4139",
+        sum = "h1:XAMtmc6zFjgojPBr38R16i9X5DOaiyS8AxkTH8/kR70=",
+        version = "v0.2.0-beta.1.0.20220314201947-076653a94fb6",
     )
 
     go_repository(
