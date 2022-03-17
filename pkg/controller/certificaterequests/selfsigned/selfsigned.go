@@ -99,6 +99,7 @@ func (s *SelfSigned) Sign(ctx context.Context, cr *cmapi.CertificateRequest, iss
 
 	privatekey, err := kube.SecretTLSKey(ctx, s.secretsLister, cr.Namespace, secretName)
 	if k8sErrors.IsNotFound(err) {
+		fmt.Println("cannot find secret")
 		message := fmt.Sprintf("Referenced secret %s/%s not found", cr.Namespace, secretName)
 
 		s.reporter.Pending(cr, err, "MissingSecret", message)

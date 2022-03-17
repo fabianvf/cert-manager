@@ -93,6 +93,7 @@ func NewCA(ctx *controllerpkg.Context) certificatesigningrequests.Signer {
 // trigger a retry.
 func (c *CA) Sign(ctx context.Context, csr *certificatesv1.CertificateSigningRequest, issuerObj cmapi.GenericIssuer) error {
 	log := logf.FromContext(ctx, "sign")
+	ctx = context.WithValue(ctx, "clusterName", issuerObj.GetClusterName())
 
 	secretName := issuerObj.GetSpec().CA.SecretName
 	resourceNamespace := c.issuerOptions.ResourceNamespace(issuerObj)
