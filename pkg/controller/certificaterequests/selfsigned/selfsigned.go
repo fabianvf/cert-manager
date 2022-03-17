@@ -81,7 +81,7 @@ func (s *SelfSigned) Sign(ctx context.Context, cr *cmapi.CertificateRequest, iss
 	log := logf.FromContext(ctx, "sign")
 
 	// Though client calls aren't being made, scoping the context for future use.
-	ctx = context.WithValue(ctx, "clusterName", cr.GetClusterName())
+	ctx = context.WithValue(ctx, "clusterName", issuerObj.GetClusterName())
 
 	resourceNamespace := s.issuerOptions.ResourceNamespace(issuerObj)
 
@@ -158,7 +158,7 @@ func (s *SelfSigned) Sign(ctx context.Context, cr *cmapi.CertificateRequest, iss
 	if err != nil || !ok {
 
 		if err == nil {
-			err = errors.New("CSR not signed by referenced private key")
+			err = errors.New("CSR not signed by referenced private key here")
 		}
 
 		message := "Error generating certificate template"

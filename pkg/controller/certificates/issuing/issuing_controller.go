@@ -31,6 +31,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clusters"
 
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
@@ -159,12 +160,16 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 
 	log := logf.FromContext(ctx).WithValues("key", key)
 
+	fmt.Println("key: ", key)
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return nil
 	}
+	fmt.Println("namespace", namespace)
+	fmt.Println("name", name)
 
 	crt, err := c.certificateLister.Certificates(namespace).Get(name)
+	fmt.Println("$$$", crt.GetClusterName())
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("certificate not found for key", "error", err.Error())
 		return nil
@@ -194,7 +199,9 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	// Fetch and parse the 'next private key secret'
-	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(*crt.Status.NextPrivateKeySecretName)
+	crtKey := clusters.ToClusterAwareKey(crt.GetClusterName(), *crt.Status.NextPrivateKeySecretName)
+	fmt.Println("crtKey****", *crt.Status.NextPrivateKeySecretName)
+	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(crtKey)
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("Next private key secret does not exist, waiting for keymanager controller")
 		// If secret does not exist, do nothing (keymanager will handle this).
@@ -313,9 +320,11 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		return nil
 	}
 
+	fmt.Println("heree!!!", crReadyCond.Reason)
 	// If the CertificateRequest is valid and ready, verify its status and issue
 	// accordingly.
 	if crReadyCond.Reason == cmapi.CertificateRequestReasonIssued {
+		fmt.Println("condition ready")
 		return c.issueCertificate(ctx, nextRevision, crt, req, pk)
 	}
 
@@ -361,6 +370,7 @@ func (c *controller) failIssueCertificate(ctx context.Context, log logr.Logger, 
 // certificate, and then store the certificate, CA and private key into the
 // Secret in the appropriate format type.
 func (c *controller) issueCertificate(ctx context.Context, nextRevision int, crt *cmapi.Certificate, req *cmapi.CertificateRequest, pk crypto.Signer) error {
+	fmt.Println("issuing certificate here")
 	crt = crt.DeepCopy()
 	if crt.Spec.PrivateKey == nil {
 		crt.Spec.PrivateKey = &cmapi.CertificatePrivateKey{}
@@ -416,6 +426,7 @@ func (c *controller) updateOrApplyStatus(ctx context.Context, crt *cmapi.Certifi
 		// False can be moved to the `issueCertificate` func.
 		if conditionRemoved {
 			message := "The certificate has been successfully issued"
+			fmt.Println("success issued")
 			apiutil.SetCertificateCondition(crt, crt.Generation, cmapi.CertificateConditionIssuing, cmmeta.ConditionFalse, "Issued", message)
 		}
 

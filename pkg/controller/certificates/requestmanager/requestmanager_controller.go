@@ -191,7 +191,6 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		return nil
 	}
 
-	fmt.Println("generating req")
 	// Discover all 'owned' CertificateRequests
 	requests, err := certificates.ListCertificateRequestsMatchingPredicates(c.certificateRequestLister.CertificateRequests(crt.Namespace), labels.Everything(), predicate.ResourceOwnedBy(crt))
 	if err != nil {
@@ -224,6 +223,8 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("generating req", len(requests))
 
 	if len(requests) > 1 {
 		// TODO: we should handle this case better, but for now do nothing to

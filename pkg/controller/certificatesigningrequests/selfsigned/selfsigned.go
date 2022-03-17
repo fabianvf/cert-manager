@@ -166,7 +166,7 @@ func (s *SelfSigned) Sign(ctx context.Context, csr *certificatesv1.CertificateSi
 	ok, err = pki.PublicKeysEqual(publickey, template.PublicKey)
 	if err != nil || !ok {
 		if err == nil {
-			err = errors.New("CSR not signed by referenced private key")
+			err = errors.New("CSR not signed by referenced private key in CSR")
 		}
 
 		message := "Referenced private key in Secret does not match that in the request"

@@ -118,8 +118,8 @@ func SecretTLSKeyPairAndCA(ctx context.Context, secretLister corelisters.SecretL
 }
 
 func SecretTLSKeyPair(ctx context.Context, secretLister corelisters.SecretLister, namespace, name string) ([]*x509.Certificate, crypto.Signer, error) {
-	secKey := clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name)
-	secret, err := secretLister.Secrets(namespace).Get(secKey)
+	// secKey := clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name)
+	secret, err := secretLister.Secrets(namespace).Get(name)
 	if err != nil {
 		fmt.Println("error here in getting secret ****")
 		return nil, nil, err
