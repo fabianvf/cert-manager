@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"reflect"
 
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 	"github.com/kr/pretty"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -43,6 +44,7 @@ var (
 )
 
 func (c *Controller) Sync(ctx context.Context, cr *cmapi.CertificateRequest) (err error) {
+	fmt.Println("herrrreee")
 	log := logf.FromContext(ctx)
 	dbg := log.V(logf.DebugLevel)
 
@@ -186,7 +188,8 @@ func (c *Controller) updateOrApply(ctx context.Context, cr *cmapi.CertificateReq
 		_, err := internalcertificaterequests.Apply(ctx, c.cmClient, c.fieldManager, cr)
 		return err
 	} else {
-		_, err := c.cmClient.CertmanagerV1().CertificateRequests(cr.Namespace).Update(ctx, cr, metav1.UpdateOptions{})
+		client := certmanagerv1.NewWithCluster(c.cmClient.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+		_, err := client.CertificateRequests(cr.Namespace).Update(ctx, cr, metav1.UpdateOptions{})
 		return err
 	}
 }
@@ -195,7 +198,8 @@ func (c *Controller) updateStatusOrApply(ctx context.Context, cr *cmapi.Certific
 	if utilfeature.DefaultFeatureGate.Enabled(feature.ServerSideApply) {
 		return internalcertificaterequests.ApplyStatus(ctx, c.cmClient, c.fieldManager, cr)
 	} else {
-		_, err := c.cmClient.CertmanagerV1().CertificateRequests(cr.Namespace).UpdateStatus(ctx, cr, metav1.UpdateOptions{})
+		client := certmanagerv1.NewWithCluster(c.cmClient.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+		_, err := client.CertificateRequests(cr.Namespace).UpdateStatus(ctx, cr, metav1.UpdateOptions{})
 		return err
 	}
 }
