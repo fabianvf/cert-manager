@@ -432,15 +432,16 @@ func (c *controller) createNewCertificateRequest(ctx context.Context, crt *cmapi
 	}
 
 	c.recorder.Eventf(crt, corev1.EventTypeNormal, reasonRequested, "Created new CertificateRequest resource %q", cr.Name)
-	if err := c.waitForCertificateRequestToExist(cr.Namespace, cr.Name); err != nil {
+	if err := c.waitForCertificateRequestToExist(cr.Namespace, cr.Name, cr.GetClusterName()); err != nil {
 		return fmt.Errorf("failed whilst waiting for CertificateRequest to exist - this may indicate an apiserver running slowly. Request will be retried")
 	}
 	return nil
 }
 
-func (c *controller) waitForCertificateRequestToExist(namespace, name string) error {
+func (c *controller) waitForCertificateRequestToExist(namespace, name, clusterName string) error {
 	return wait.Poll(time.Millisecond*100, time.Second*5, func() (bool, error) {
-		_, err := c.certificateRequestLister.CertificateRequests(namespace).Get(name)
+		certKey := clusters.ToClusterAwareKey(clusterName, name)
+		_, err := c.certificateRequestLister.CertificateRequests(namespace).Get(certKey)
 		if apierrors.IsNotFound(err) {
 			return false, nil
 		}
