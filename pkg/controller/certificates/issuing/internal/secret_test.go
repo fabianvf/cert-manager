@@ -677,10 +677,12 @@ func Test_SecretsManager(t *testing.T) {
 			}
 			secretLister := testcorelisters.NewFakeSecretLister(mod)
 
+			// TODO(kcp): fix this - passing nil for kubeclient for now
 			testManager := NewSecretsManager(
 				secretClient, secretLister,
 				"cert-manager-test",
 				test.certificateOptions.EnableOwnerRef,
+				nil,
 			)
 
 			err := testManager.UpdateData(context.Background(), test.certificate, test.secretData)

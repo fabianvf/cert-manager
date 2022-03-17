@@ -136,10 +136,7 @@ func NewController(
 		certificateInformer.Informer().HasSynced,
 	}
 
-	secretsManager := internal.NewSecretsManager(
-		kubeClient.CoreV1(), secretsInformer.Lister(),
-		fieldManager, certificateControllerOptions.EnableOwnerRef,
-	)
+	secretsManager := internal.NewSecretsManager(kubeClient.CoreV1(), secretsInformer.Lister(), fieldManager, certificateControllerOptions.EnableOwnerRef, kubeClient)
 
 	return &controller{
 		certificateLister:        certificateInformer.Lister(),
