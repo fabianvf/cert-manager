@@ -34,6 +34,7 @@ import (
 	"k8s.io/client-go/informers"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clusters"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
@@ -130,6 +131,7 @@ func NewController(
 }
 
 func (c *controller) ProcessItem(ctx context.Context, key string) error {
+	fmt.Println("request manager**********", key)
 	log := logf.FromContext(ctx).WithValues("key", key)
 
 	ctx = logf.NewContext(ctx, log)
@@ -162,7 +164,16 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		log.V(logf.DebugLevel).Info("status.nextPrivateKeySecretName not yet set, waiting for keymanager before processing certificate")
 		return nil
 	}
-	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(*crt.Status.NextPrivateKeySecretName)
+	fmt.Println(*crt.Status.NextPrivateKeySecretName, "!!!!!!!!!!!!!!!!!!!!!!")
+
+	list, err := c.secretLister.Secrets(crt.Namespace).List(labels.Everything())
+	for _, l := range list {
+		fmt.Println("&&&&&&")
+		fmt.Println(l.GetName())
+		fmt.Println("&&&&&&")
+	}
+	certKey := clusters.ToClusterAwareKey(crt.GetClusterName(), *crt.Status.NextPrivateKeySecretName)
+	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(certKey)
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("nextPrivateKeySecretName Secret resource does not exist, waiting for keymanager to create it before continuing")
 		return nil
@@ -180,6 +191,7 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		return nil
 	}
 
+	fmt.Println("generating req")
 	// Discover all 'owned' CertificateRequests
 	requests, err := certificates.ListCertificateRequestsMatchingPredicates(c.certificateRequestLister.CertificateRequests(crt.Namespace), labels.Everything(), predicate.ResourceOwnedBy(crt))
 	if err != nil {
@@ -227,6 +239,7 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		return nil
 	}
 
+	fmt.Println(len(requests))
 	return c.createNewCertificateRequest(ctx, crt, pk, nextRevision, nextPrivateKeySecret.Name)
 }
 
@@ -370,6 +383,7 @@ func (c *controller) deleteRequestsNotMatchingSpec(ctx context.Context, crt *cma
 
 func (c *controller) createNewCertificateRequest(ctx context.Context, crt *cmapi.Certificate, pk crypto.Signer, nextRevision int, nextPrivateKeySecretName string) error {
 	log := logf.FromContext(ctx)
+
 	x509CSR, err := pki.GenerateCSR(crt)
 	if err != nil {
 		log.Error(err, "Failed to generate CSR - will not retry")
@@ -395,6 +409,7 @@ func (c *controller) createNewCertificateRequest(ctx context.Context, crt *cmapi
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:       crt.Namespace,
 			GenerateName:    apiutil.DNSSafeShortenTo52Characters(crt.Name) + "-",
+			ClusterName:     crt.GetClusterName(),
 			Annotations:     annotations,
 			Labels:          crt.Labels,
 			OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(crt, certificateGvk)},
@@ -408,7 +423,8 @@ func (c *controller) createNewCertificateRequest(ctx context.Context, crt *cmapi
 		},
 	}
 
-	cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+	fmt.Println("creating certificate request")
+	cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), crt.GetClusterName())
 	cr, err = cl.CertificateRequests(cr.Namespace).Create(ctx, cr, metav1.CreateOptions{FieldManager: c.fieldManager})
 	if err != nil {
 		c.recorder.Eventf(crt, corev1.EventTypeWarning, reasonRequestFailed, "Failed to create CertificateRequest: "+err.Error())

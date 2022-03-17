@@ -27,6 +27,7 @@ import (
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/client-go/tools/clusters"
 
 	internalcertificaterequests "github.com/cert-manager/cert-manager/internal/controller/certificaterequests"
 	"github.com/cert-manager/cert-manager/internal/controller/feature"
@@ -86,6 +87,7 @@ func (c *Controller) Sync(ctx context.Context, cr *cmapi.CertificateRequest) (er
 
 	dbg.Info("fetching issuer object referenced by CertificateRequest")
 
+	crCopy.Spec.IssuerRef.Name = clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), crCopy.Spec.IssuerRef.Name)
 	issuerObj, err := c.helper.GetGenericIssuer(crCopy.Spec.IssuerRef, crCopy.Namespace)
 	if k8sErrors.IsNotFound(err) {
 		c.reporter.Pending(crCopy, err, "IssuerNotFound",
