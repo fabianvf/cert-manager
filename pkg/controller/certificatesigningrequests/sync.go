@@ -43,6 +43,7 @@ func (c *Controller) Sync(ctx context.Context, csr *certificatesv1.CertificateSi
 	// invalidation by future contributions.
 	csr = csr.DeepCopy()
 
+	ctx = context.WithValue(ctx, "clusterName", csr.GetClusterName())
 	ref, ok := util.SignerIssuerRefFromSignerName(csr.Spec.SignerName)
 	if !ok {
 		dbg.Info("certificate signing request has malformed signer name,", "signerName", csr.Spec.SignerName)
@@ -119,7 +120,7 @@ func (c *Controller) Sync(ctx context.Context, csr *certificatesv1.CertificateSi
 			message := fmt.Sprintf("Requester may not reference Namespaced Issuer %s/%s", ref.Namespace, ref.Name)
 			c.recorder.Event(csr, corev1.EventTypeWarning, "DeniedReference", message)
 			util.CertificateSigningRequestSetFailed(csr, "DeniedReference", message)
-			_, err := util.UpdateOrApplyStatus(ctx, c.certClient, csr, certificatesv1.CertificateFailed, c.fieldManager)
+			_, err := util.UpdateOrApplyStatus(ctx, c.kubeclient, c.certClient, csr, certificatesv1.CertificateFailed, c.fieldManager)
 			return err
 		}
 	}

@@ -38,6 +38,7 @@ func SecretTLSKeyRef(ctx context.Context, secretLister corelisters.SecretLister,
 	secKey := clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name)
 	secret, err := secretLister.Secrets(namespace).Get(secKey)
 	if err != nil {
+		fmt.Println("secret not found!")
 		return nil, err
 	}
 
@@ -102,6 +103,7 @@ func SecretTLSKeyPairAndCA(ctx context.Context, secretLister corelisters.SecretL
 
 	secret, err := secretLister.Secrets(namespace).Get(name)
 	if err != nil {
+		fmt.Println("error getting secret here***")
 		return nil, nil, err
 	}
 

@@ -24,6 +24,7 @@ import (
 	certificatesv1 "k8s.io/api/certificates/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/kubernetes"
 	authzclient "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	certificatesclient "k8s.io/client-go/kubernetes/typed/certificates/v1"
 	certificateslisters "k8s.io/client-go/listers/certificates/v1"
@@ -62,6 +63,9 @@ type Controller struct {
 	certClient certificatesclient.CertificateSigningRequestInterface
 	csrLister  certificateslisters.CertificateSigningRequestLister
 	sarClient  authzclient.SubjectAccessReviewInterface
+
+	// kubeclient
+	kubeclient kubernetes.Interface
 
 	// fieldManager is the manager name used for the Apply operations.
 	fieldManager string
@@ -184,6 +188,7 @@ func (c *Controller) Register(ctx *controllerpkg.Context) (workqueue.RateLimitin
 	c.recorder = ctx.Recorder
 	c.certClient = kubeClient.CertificatesV1().CertificateSigningRequests()
 	c.fieldManager = ctx.FieldManager
+	c.kubeclient = kubeClient
 
 	// Construct the signer implementation with the built component context.
 	c.signer = c.signerConstructor(ctx)
