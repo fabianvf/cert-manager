@@ -93,7 +93,7 @@ func ParseTLSKeyFromSecret(secret *corev1.Secret, keyName string) (crypto.Signer
 }
 
 func SecretTLSCertChain(ctx context.Context, secretLister corelisters.SecretLister, namespace, name string) ([]*x509.Certificate, error) {
-	secret, err := secretLister.Secrets(namespace).Get(name)
+	secret, err := secretLister.Secrets(namespace).Get(clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name))
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func SecretTLSKeyPairAndCA(ctx context.Context, secretLister corelisters.SecretL
 		return nil, nil, err
 	}
 
-	secret, err := secretLister.Secrets(namespace).Get(name)
+	secret, err := secretLister.Secrets(namespace).Get(clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name))
 	if err != nil {
 		fmt.Println("error getting secret here***")
 		return nil, nil, err
@@ -140,7 +140,7 @@ func SecretTLSKeyPairAndCA(ctx context.Context, secretLister corelisters.SecretL
 
 func SecretTLSKeyPair(ctx context.Context, secretLister corelisters.SecretLister, namespace, name string) ([]*x509.Certificate, crypto.Signer, error) {
 	// secKey := clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name)
-	secret, err := secretLister.Secrets(namespace).Get(name)
+	secret, err := secretLister.Secrets(namespace).Get(clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name))
 	if err != nil {
 		fmt.Println("error here in getting secret ****")
 		return nil, nil, err

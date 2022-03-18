@@ -244,7 +244,6 @@ func (g *Gatherer) DataForCertificate(ctx context.Context, crt *cmapi.Certificat
 	log := logf.FromContext(ctx)
 	// Attempt to fetch the Secret being managed but tolerate NotFound errors.
 	secret, err := g.SecretLister.Secrets(crt.Namespace).Get(clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), crt.Spec.SecretName))
-	// secret, err := g.SecretLister.Secrets(crt.Namespace).Get(crt.Spec.SecretName)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return Input{}, err
 	}
