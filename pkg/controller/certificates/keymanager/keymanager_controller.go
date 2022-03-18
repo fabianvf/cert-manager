@@ -34,6 +34,7 @@ import (
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clusters"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 
@@ -239,7 +240,8 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 
 func (c *controller) createNextPrivateKeyRotationPolicyNever(ctx context.Context, crt *cmapi.Certificate) error {
 	log := logf.FromContext(ctx)
-	s, err := c.secretLister.Secrets(crt.Namespace).Get(crt.Spec.SecretName)
+	secKey := clusters.ToClusterAwareKey(crt.GetClusterName(), crt.Spec.SecretName)
+	s, err := c.secretLister.Secrets(crt.Namespace).Get(secKey)
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("Creating new nextPrivateKeySecretName Secret because no existing Secret found and rotation policy is Never")
 		return c.createAndSetNextPrivateKey(ctx, crt)

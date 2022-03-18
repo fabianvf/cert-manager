@@ -213,6 +213,7 @@ func TestProcessItem(t *testing.T) {
 			},
 		},
 	}
+	// TODDO(kcp): fix this
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			// Create and initialise a new unit test builder
@@ -350,6 +351,7 @@ func TestCertificateRequestsToDelete(t *testing.T) {
 						Namespace: gen.DefaultTestNamespace,
 						Name:      "cr-6",
 					},
+					"to fix",
 				},
 				{
 					3,
@@ -357,6 +359,7 @@ func TestCertificateRequestsToDelete(t *testing.T) {
 						Namespace: gen.DefaultTestNamespace,
 						Name:      "cr-3",
 					},
+					"to fix",
 				},
 				{
 					123,
@@ -364,6 +367,7 @@ func TestCertificateRequestsToDelete(t *testing.T) {
 						Namespace: gen.DefaultTestNamespace,
 						Name:      "cr-1",
 					},
+					"to fix",
 				},
 			},
 		},
@@ -402,6 +406,7 @@ func TestCertificateRequestsToDelete(t *testing.T) {
 						Namespace: gen.DefaultTestNamespace,
 						Name:      "cr-6",
 					},
+					"to fix this",
 				},
 			},
 		},
