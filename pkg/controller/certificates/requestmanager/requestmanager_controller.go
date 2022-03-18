@@ -131,7 +131,6 @@ func NewController(
 }
 
 func (c *controller) ProcessItem(ctx context.Context, key string) error {
-	fmt.Println("request manager**********", key)
 	log := logf.FromContext(ctx).WithValues("key", key)
 
 	ctx = logf.NewContext(ctx, log)
@@ -164,17 +163,7 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		log.V(logf.DebugLevel).Info("status.nextPrivateKeySecretName not yet set, waiting for keymanager before processing certificate")
 		return nil
 	}
-	fmt.Println(*crt.Status.NextPrivateKeySecretName, "!!!!!!!!!!!!!!!!!!!!!!")
 
-	list, err := c.secretLister.Secrets(crt.Namespace).List(labels.Everything())
-	if err != nil {
-		return err
-	}
-	for _, l := range list {
-		fmt.Println("&&&&&&")
-		fmt.Println(l.GetName())
-		fmt.Println("&&&&&&")
-	}
 	certKey := clusters.ToClusterAwareKey(crt.GetClusterName(), *crt.Status.NextPrivateKeySecretName)
 	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(certKey)
 	if apierrors.IsNotFound(err) {
@@ -227,8 +216,6 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		return err
 	}
 
-	fmt.Println("generating req", len(requests))
-
 	if len(requests) > 1 {
 		// TODO: we should handle this case better, but for now do nothing to
 		//  avoid getting into loops where we keep creating multiple requests
@@ -243,7 +230,6 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		return nil
 	}
 
-	fmt.Println(len(requests))
 	return c.createNewCertificateRequest(ctx, crt, pk, nextRevision, nextPrivateKeySecret.Name)
 }
 
@@ -427,7 +413,6 @@ func (c *controller) createNewCertificateRequest(ctx context.Context, crt *cmapi
 		},
 	}
 
-	fmt.Println("creating certificate request")
 	cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), crt.GetClusterName())
 	cr, err = cl.CertificateRequests(cr.Namespace).Create(ctx, cr, metav1.CreateOptions{FieldManager: c.fieldManager})
 	if err != nil {

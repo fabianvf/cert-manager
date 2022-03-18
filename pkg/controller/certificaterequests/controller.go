@@ -209,7 +209,6 @@ func (c *Controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	cr, err := c.certificateRequestLister.CertificateRequests(namespace).Get(name)
-	fmt.Println("getting certificate request")
 	if err != nil {
 		if k8sErrors.IsNotFound(err) {
 			dbg.Info(fmt.Sprintf("certificate request in work queue no longer exists: %s", err))
@@ -220,7 +219,6 @@ func (c *Controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	ctx = logf.NewContext(ctx, logf.WithResource(log, cr))
-	fmt.Println("clusterName in cert req: ", cr.GetClusterName())
 	ctx = context.WithValue(ctx, "clusterName", cr.GetClusterName())
 	return c.Sync(ctx, cr)
 }

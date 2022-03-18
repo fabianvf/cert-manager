@@ -115,7 +115,6 @@ func (s *SelfSigned) Sign(ctx context.Context, csr *certificatesv1.CertificateSi
 
 	privatekey, err := kube.SecretTLSKey(ctx, s.secretsLister, resourceNamespace, secretName, s.kubeClient)
 	if apierrors.IsNotFound(err) {
-		fmt.Println("cannot find secret while signing")
 		message := fmt.Sprintf("Referenced Secret %s/%s not found", resourceNamespace, secretName)
 		log.Error(err, message)
 		s.recorder.Event(csr, corev1.EventTypeWarning, "SecretNotFound", message)
@@ -169,7 +168,7 @@ func (s *SelfSigned) Sign(ctx context.Context, csr *certificatesv1.CertificateSi
 	ok, err = pki.PublicKeysEqual(publickey, template.PublicKey)
 	if err != nil || !ok {
 		if err == nil {
-			err = errors.New("CSR not signed by referenced private key in CSR")
+			err = errors.New("CSR not signed by referenced private key")
 		}
 
 		message := "Referenced private key in Secret does not match that in the request"

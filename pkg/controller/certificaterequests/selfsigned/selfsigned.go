@@ -102,7 +102,6 @@ func (s *SelfSigned) Sign(ctx context.Context, cr *cmapi.CertificateRequest, iss
 
 	privatekey, err := kube.SecretTLSKey(ctx, s.secretsLister, cr.Namespace, secretName, s.kubeclient)
 	if k8sErrors.IsNotFound(err) {
-		fmt.Println("cannot find secret not here")
 		message := fmt.Sprintf("Referenced secret %s/%s not found", cr.Namespace, secretName)
 
 		s.reporter.Pending(cr, err, "MissingSecret", message)
@@ -161,7 +160,7 @@ func (s *SelfSigned) Sign(ctx context.Context, cr *cmapi.CertificateRequest, iss
 	if err != nil || !ok {
 
 		if err == nil {
-			err = errors.New("CSR not signed by referenced private key here")
+			err = errors.New("CSR not signed by referenced private key")
 		}
 
 		message := "Error generating certificate template"

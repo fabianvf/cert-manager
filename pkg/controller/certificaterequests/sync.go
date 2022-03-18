@@ -45,7 +45,6 @@ var (
 )
 
 func (c *Controller) Sync(ctx context.Context, cr *cmapi.CertificateRequest) (err error) {
-	fmt.Println("herrrreee")
 	log := logf.FromContext(ctx)
 	dbg := log.V(logf.DebugLevel)
 

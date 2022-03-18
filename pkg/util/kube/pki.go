@@ -20,11 +20,9 @@ import (
 	"context"
 	"crypto"
 	"crypto/x509"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/clusters"
@@ -42,11 +40,6 @@ import (
 func SecretTLSKeyRef(ctx context.Context, secretLister corelisters.SecretLister, namespace, name, keyName string, client kubernetes.Interface) (crypto.Signer, error) {
 	secKey := clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name)
 
-	list, err := secretLister.List(labels.Everything())
-	for _, l := range list {
-		fmt.Println("****", l.GetName(), l.ClusterName, "****")
-	}
-	fmt.Println("required secret", secKey, name)
 	secret, err := secretLister.Secrets(namespace).Get(secKey)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
@@ -56,7 +49,6 @@ func SecretTLSKeyRef(ctx context.Context, secretLister corelisters.SecretLister,
 				return nil, err
 			}
 		} else {
-			fmt.Println("secret not found!")
 			return nil, err
 		}
 	}
@@ -122,7 +114,6 @@ func SecretTLSKeyPairAndCA(ctx context.Context, secretLister corelisters.SecretL
 
 	secret, err := secretLister.Secrets(namespace).Get(clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name))
 	if err != nil {
-		fmt.Println("error getting secret here***")
 		return nil, nil, err
 	}
 
@@ -142,7 +133,6 @@ func SecretTLSKeyPair(ctx context.Context, secretLister corelisters.SecretLister
 	// secKey := clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name)
 	secret, err := secretLister.Secrets(namespace).Get(clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name))
 	if err != nil {
-		fmt.Println("error here in getting secret ****")
 		return nil, nil, err
 	}
 
