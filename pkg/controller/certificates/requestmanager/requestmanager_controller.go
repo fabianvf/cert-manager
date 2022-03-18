@@ -167,6 +167,9 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	fmt.Println(*crt.Status.NextPrivateKeySecretName, "!!!!!!!!!!!!!!!!!!!!!!")
 
 	list, err := c.secretLister.Secrets(crt.Namespace).List(labels.Everything())
+	if err != nil {
+		return err
+	}
 	for _, l := range list {
 		fmt.Println("&&&&&&")
 		fmt.Println(l.GetName())
@@ -344,7 +347,7 @@ func (c *controller) deleteRequestsNotMatchingSpec(ctx context.Context, crt *cma
 		violations, err := certificates.RequestMatchesSpec(req, crt.Spec)
 
 		// creating client with cluster name of the certificate instead of certificate request.
-		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), req.ClusterName)
 		if err != nil {
 			log.Error(err, "Failed to check if CertificateRequest matches spec, deleting CertificateRequest")
 			if err := cl.CertificateRequests(req.Namespace).Delete(ctx, req.Name, metav1.DeleteOptions{}); err != nil {
