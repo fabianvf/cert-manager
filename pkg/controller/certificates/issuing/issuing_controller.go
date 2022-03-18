@@ -55,6 +55,7 @@ import (
 	utilkube "github.com/cert-manager/cert-manager/pkg/util/kube"
 	utilpki "github.com/cert-manager/cert-manager/pkg/util/pki"
 	"github.com/cert-manager/cert-manager/pkg/util/predicate"
+	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
@@ -73,7 +74,8 @@ type controller struct {
 	recorder                 record.EventRecorder
 	clock                    clock.Clock
 
-	client cmclient.Interface
+	client     cmclient.Interface
+	kubeclient kubernetes.Interface
 
 	// secretsUpdateData is used by the SecretTemplate controller for
 	// re-reconciling Secrets where the SecretTemplate is not up to date with a
@@ -144,6 +146,7 @@ func NewController(
 		certificateRequestLister: certificateRequestInformer.Lister(),
 		secretLister:             secretsInformer.Lister(),
 		client:                   client,
+		kubeclient:               kubeClient,
 		recorder:                 recorder,
 		clock:                    clock,
 		secretsUpdateData:        secretsManager.UpdateData,
@@ -203,9 +206,13 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	fmt.Println("crtKey****", *crt.Status.NextPrivateKeySecretName)
 	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(crtKey)
 	if apierrors.IsNotFound(err) {
-		log.V(logf.DebugLevel).Info("Next private key secret does not exist, waiting for keymanager controller")
-		// If secret does not exist, do nothing (keymanager will handle this).
-		return nil
+		cl := corev1client.NewWithCluster(c.kubeclient.CoreV1().RESTClient(), crt.GetClusterName())
+		nextPrivateKeySecret, err = cl.Secrets(crt.Namespace).Get(ctx, *crt.Status.NextPrivateKeySecretName, metav1.GetOptions{})
+		if err != nil {
+			log.V(logf.DebugLevel).Info("Next private key secret does not exist, waiting for keymanager controller")
+			// If secret does not exist, do nothing (keymanager will handle this).
+			return nil
+		}
 	}
 	if err != nil {
 		return err
