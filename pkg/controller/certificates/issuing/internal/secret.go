@@ -26,6 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	applycorev1 "k8s.io/client-go/applyconfigurations/core/v1"
 	applymetav1 "k8s.io/client-go/applyconfigurations/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	coreclient "k8s.io/client-go/kubernetes/typed/core/v1"
 	corelisters "k8s.io/client-go/listers/core/v1"
 
@@ -50,6 +51,9 @@ type SecretsManager struct {
 	// fieldManager is the manager name used for the Apply operations on Secrets.
 	fieldManager string
 
+	// client
+	coreClient kubernetes.Interface
+
 	// if true, Secret resources created by the controller will have an
 	// 'owner reference' set, meaning when the Certificate is deleted, the
 	// Secret resource will be automatically deleted.
@@ -70,12 +74,14 @@ func NewSecretsManager(
 	secretLister corelisters.SecretLister,
 	fieldManager string,
 	enableSecretOwnerReferences bool,
+	coreclient kubernetes.Interface,
 ) *SecretsManager {
 	return &SecretsManager{
 		secretClient:                secretClient,
 		secretLister:                secretLister,
 		fieldManager:                fieldManager,
 		enableSecretOwnerReferences: enableSecretOwnerReferences,
+		coreClient:                  coreclient,
 	}
 }
 
@@ -84,6 +90,7 @@ func NewSecretsManager(
 // If the Secret resource does not exist, it will be created on Apply.
 // UpdateData will also update deprecated annotations if they exist.
 func (s *SecretsManager) UpdateData(ctx context.Context, crt *cmapi.Certificate, data SecretData) error {
+	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
 	secret, err := s.getCertificateSecret(ctx, crt)
 	if err != nil {
 		return err
@@ -115,8 +122,8 @@ func (s *SecretsManager) UpdateData(ctx context.Context, crt *cmapi.Certificate,
 	}
 
 	log.V(logf.DebugLevel).Info("applying secret")
-
-	_, err = s.secretClient.Secrets(secret.Namespace).Apply(ctx, applyCnf, applyOpts)
+	cl := coreclient.NewWithCluster(s.coreClient.CoreV1().RESTClient(), crt.GetClusterName())
+	_, err = cl.Secrets(secret.Namespace).Apply(ctx, applyCnf, applyOpts)
 	if err != nil {
 		return fmt.Errorf("failed to apply secret %s/%s: %w", secret.Namespace, secret.Name, err)
 	}

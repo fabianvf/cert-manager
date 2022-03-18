@@ -219,6 +219,7 @@ func (c *Controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	ctx = logf.NewContext(ctx, logf.WithResource(log, cr))
+	ctx = context.WithValue(ctx, "clusterName", cr.GetClusterName())
 	return c.Sync(ctx, cr)
 }
 

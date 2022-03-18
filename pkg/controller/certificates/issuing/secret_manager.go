@@ -23,6 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/tools/clusters"
 
 	"github.com/cert-manager/cert-manager/internal/controller/certificates/policies"
 	cmapi "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -37,7 +38,8 @@ import (
 // AdditionalOutputFormats.
 func (c *controller) ensureSecretData(ctx context.Context, log logr.Logger, crt *cmapi.Certificate) error {
 	// Retrieve the Secret which is associated with this Certificate.
-	secret, err := c.secretLister.Secrets(crt.Namespace).Get(crt.Spec.SecretName)
+	secKey := clusters.ToClusterAwareKey(crt.GetClusterName(), crt.Spec.SecretName)
+	secret, err := c.secretLister.Secrets(crt.Namespace).Get(secKey)
 
 	// Secret doesn't exist so we can't do anything. The Certificate will be
 	// marked for a re-issuance and the resulting Secret will be evaluated again.

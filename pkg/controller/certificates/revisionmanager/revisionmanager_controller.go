@@ -57,6 +57,7 @@ type controller struct {
 type revision struct {
 	rev int
 	types.NamespacedName
+	clusterName string
 }
 
 func NewController(log logr.Logger, client cmclient.Interface, cmFactory cminformers.SharedInformerFactory) (*controller, workqueue.RateLimitingInterface, []cache.InformerSynced) {
@@ -143,7 +144,7 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	for _, req := range toDelete {
 		logf.WithRelatedResourceName(log, req.Name, req.Namespace, cmapi.CertificateRequestKind).
 			WithValues("revision", req.rev).Info("garbage collecting old certificate request revsion")
-		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), req.clusterName)
 		err = cl.CertificateRequests(req.Namespace).Delete(ctx, req.Name, metav1.DeleteOptions{})
 		if apierrors.IsNotFound(err) {
 			continue
@@ -183,7 +184,7 @@ func certificateRequestsToDelete(log logr.Logger, limit int, requests []*cmapi.C
 			continue
 		}
 
-		revisions = append(revisions, revision{rn, types.NamespacedName{Namespace: req.Namespace, Name: req.Name}})
+		revisions = append(revisions, revision{rn, types.NamespacedName{Namespace: req.Namespace, Name: req.Name}, req.ClusterName})
 	}
 
 	sort.SliceStable(revisions, func(i, j int) bool {

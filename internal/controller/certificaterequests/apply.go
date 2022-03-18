@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
@@ -40,7 +41,8 @@ func Apply(ctx context.Context, cl cmclient.Interface, fieldManager string, req 
 		return nil, err
 	}
 
-	return cl.CertmanagerV1().CertificateRequests(req.Namespace).Patch(
+	client := certmanagerv1.NewWithCluster(cl.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+	return client.CertificateRequests(req.Namespace).Patch(
 		ctx, req.Name, apitypes.ApplyPatchType, reqData,
 		metav1.PatchOptions{Force: pointer.Bool(true), FieldManager: fieldManager})
 }
@@ -57,7 +59,8 @@ func ApplyStatus(ctx context.Context, cl cmclient.Interface, fieldManager string
 		return err
 	}
 
-	_, err = cl.CertmanagerV1().CertificateRequests(req.Namespace).Patch(
+	client := certmanagerv1.NewWithCluster(cl.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+	_, err = client.CertificateRequests(req.Namespace).Patch(
 		ctx, req.Name, apitypes.ApplyPatchType, reqData,
 		metav1.PatchOptions{Force: pointer.Bool(true), FieldManager: fieldManager}, "status",
 	)

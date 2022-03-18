@@ -90,9 +90,11 @@ func New(ctx *controller.Context, issuer v1.GenericIssuer) (issuer.Interface, er
 type keyFromSecretFunc func(ctx context.Context, namespace, name, keyName string) (crypto.Signer, error)
 
 // newKeyFromSecret returns an implementation of keyFromSecretFunc for a secrets lister.
+// TODO: fix this!!! passing nil instead of kubeclient for now
 func newKeyFromSecret(secretLister corelisters.SecretLister) keyFromSecretFunc {
 	return func(ctx context.Context, namespace, name, keyName string) (crypto.Signer, error) {
-		return kube.SecretTLSKeyRef(ctx, secretLister, namespace, name, keyName)
+		return kube.SecretTLSKeyRef(ctx, secretLister, namespace, name, keyName, nil)
+
 	}
 }
 

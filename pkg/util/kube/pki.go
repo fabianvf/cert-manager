@@ -22,20 +22,35 @@ import (
 	"crypto/x509"
 
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
+	"k8s.io/client-go/tools/clusters"
 
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 	"github.com/cert-manager/cert-manager/pkg/util/errors"
 	"github.com/cert-manager/cert-manager/pkg/util/pki"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 // SecretTLSKeyRef will decode a PKCS1/SEC1 (in effect, a RSA or ECDSA) private key stored in a
 // secret with 'name' in 'namespace'. It will read the private key data from the secret
 // entry with name 'keyName'.
-func SecretTLSKeyRef(ctx context.Context, secretLister corelisters.SecretLister, namespace, name, keyName string) (crypto.Signer, error) {
-	secret, err := secretLister.Secrets(namespace).Get(name)
+func SecretTLSKeyRef(ctx context.Context, secretLister corelisters.SecretLister, namespace, name, keyName string, client kubernetes.Interface) (crypto.Signer, error) {
+	secKey := clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name)
+
+	secret, err := secretLister.Secrets(namespace).Get(secKey)
 	if err != nil {
-		return nil, err
+		if apierrors.IsNotFound(err) {
+			cl := corev1client.NewWithCluster(client.CoreV1().RESTClient(), ctx.Value("clusterName").(string))
+			secret, err = cl.Secrets(namespace).Get(ctx, name, v1.GetOptions{})
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	key, _, err := ParseTLSKeyFromSecret(secret, keyName)
@@ -49,8 +64,8 @@ func SecretTLSKeyRef(ctx context.Context, secretLister corelisters.SecretLister,
 // SecretTLSKey will decode a PKCS1/SEC1 (in effect, a RSA or ECDSA) private key stored in a
 // secret with 'name' in 'namespace'. It will read the private key data from the secret
 // entry with name 'keyName'.
-func SecretTLSKey(ctx context.Context, secretLister corelisters.SecretLister, namespace, name string) (crypto.Signer, error) {
-	return SecretTLSKeyRef(ctx, secretLister, namespace, name, corev1.TLSPrivateKeyKey)
+func SecretTLSKey(ctx context.Context, secretLister corelisters.SecretLister, namespace, name string, client kubernetes.Interface) (crypto.Signer, error) {
+	return SecretTLSKeyRef(ctx, secretLister, namespace, name, corev1.TLSPrivateKeyKey, client)
 }
 
 // ParseTLSKeyFromSecret will parse and decode a private key from the given
@@ -70,7 +85,7 @@ func ParseTLSKeyFromSecret(secret *corev1.Secret, keyName string) (crypto.Signer
 }
 
 func SecretTLSCertChain(ctx context.Context, secretLister corelisters.SecretLister, namespace, name string) ([]*x509.Certificate, error) {
-	secret, err := secretLister.Secrets(namespace).Get(name)
+	secret, err := secretLister.Secrets(namespace).Get(clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name))
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +112,7 @@ func SecretTLSKeyPairAndCA(ctx context.Context, secretLister corelisters.SecretL
 		return nil, nil, err
 	}
 
-	secret, err := secretLister.Secrets(namespace).Get(name)
+	secret, err := secretLister.Secrets(namespace).Get(clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -115,7 +130,8 @@ func SecretTLSKeyPairAndCA(ctx context.Context, secretLister corelisters.SecretL
 }
 
 func SecretTLSKeyPair(ctx context.Context, secretLister corelisters.SecretLister, namespace, name string) ([]*x509.Certificate, crypto.Signer, error) {
-	secret, err := secretLister.Secrets(namespace).Get(name)
+	// secKey := clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name)
+	secret, err := secretLister.Secrets(namespace).Get(clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name))
 	if err != nil {
 		return nil, nil, err
 	}

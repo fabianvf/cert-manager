@@ -22,6 +22,7 @@ import (
 	certificatesv1 "k8s.io/api/certificates/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	certificatesapply "k8s.io/client-go/applyconfigurations/certificates/v1"
+	"k8s.io/client-go/kubernetes"
 	certificatesclient "k8s.io/client-go/kubernetes/typed/certificates/v1"
 
 	"github.com/cert-manager/cert-manager/internal/controller/feature"
@@ -34,11 +35,13 @@ import (
 // only be applied if non-empty and the condition with that type exists on the
 // CertificateSigningRequest.
 func UpdateOrApplyStatus(ctx context.Context,
+	kubeClient kubernetes.Interface,
 	cl certificatesclient.CertificateSigningRequestInterface,
 	csr *certificatesv1.CertificateSigningRequest,
 	condType certificatesv1.RequestConditionType,
 	fieldManager string,
 ) (*certificatesv1.CertificateSigningRequest, error) {
+	client := certificatesclient.NewWithCluster(kubeClient.CertificatesV1().RESTClient(), csr.GetClusterName())
 	if utilfeature.DefaultFeatureGate.Enabled(feature.ServerSideApply) {
 		status := certificatesapply.CertificateSigningRequestStatus().
 			WithCertificate(csr.Status.Certificate...)
@@ -55,10 +58,13 @@ func UpdateOrApplyStatus(ctx context.Context,
 			}
 		}
 
-		return cl.ApplyStatus(ctx, certificatesapply.CertificateSigningRequest(csr.Name).WithStatus(status),
+		// toedit
+		return client.CertificateSigningRequests().ApplyStatus(ctx, certificatesapply.CertificateSigningRequest(csr.Name).WithStatus(status),
 			metav1.ApplyOptions{Force: true, FieldManager: fieldManager},
 		)
 	} else {
-		return cl.UpdateStatus(ctx, csr, metav1.UpdateOptions{})
+		return client.CertificateSigningRequests().UpdateStatus(ctx, csr, metav1.UpdateOptions{})
 	}
 }
+
+// client := certificatesclient.NewWithCluster(kubeClient.CertificatesV1().RESTClient(), csr.GetClusterName())

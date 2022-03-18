@@ -25,6 +25,7 @@ import (
 	certificatesv1 "k8s.io/api/certificates/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/kubernetes"
 	certificatesclient "k8s.io/client-go/kubernetes/typed/certificates/v1"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/record"
@@ -54,6 +55,7 @@ type CA struct {
 	issuerOptions controllerpkg.IssuerOptions
 	secretsLister corelisters.SecretLister
 
+	kubeclient kubernetes.Interface
 	certClient certificatesclient.CertificateSigningRequestInterface
 
 	// fieldManager is the manager name used for the Apply operations.
@@ -79,6 +81,7 @@ func NewCA(ctx *controllerpkg.Context) certificatesigningrequests.Signer {
 	return &CA{
 		issuerOptions:     ctx.IssuerOptions,
 		secretsLister:     ctx.KubeSharedInformerFactory.Core().V1().Secrets().Lister(),
+		kubeclient:        ctx.Client,
 		certClient:        ctx.Client.CertificatesV1().CertificateSigningRequests(),
 		fieldManager:      ctx.FieldManager,
 		recorder:          ctx.Recorder,
@@ -93,6 +96,7 @@ func NewCA(ctx *controllerpkg.Context) certificatesigningrequests.Signer {
 // trigger a retry.
 func (c *CA) Sign(ctx context.Context, csr *certificatesv1.CertificateSigningRequest, issuerObj cmapi.GenericIssuer) error {
 	log := logf.FromContext(ctx, "sign")
+	ctx = context.WithValue(ctx, "clusterName", issuerObj.GetClusterName())
 
 	secretName := issuerObj.GetSpec().CA.SecretName
 	resourceNamespace := c.issuerOptions.ResourceNamespace(issuerObj)
@@ -123,7 +127,7 @@ func (c *CA) Sign(ctx context.Context, csr *certificatesv1.CertificateSigningReq
 		message := fmt.Sprintf("Error generating certificate template: %s", err)
 		c.recorder.Event(csr, corev1.EventTypeWarning, "SigningError", message)
 		util.CertificateSigningRequestSetFailed(csr, "SigningError", message)
-		_, err := util.UpdateOrApplyStatus(ctx, c.certClient, csr, certificatesv1.CertificateFailed, c.fieldManager)
+		_, err := util.UpdateOrApplyStatus(ctx, c.kubeclient, c.certClient, csr, certificatesv1.CertificateFailed, c.fieldManager)
 		return err
 	}
 
@@ -135,12 +139,12 @@ func (c *CA) Sign(ctx context.Context, csr *certificatesv1.CertificateSigningReq
 		message := fmt.Sprintf("Error signing certificate: %s", err)
 		c.recorder.Event(csr, corev1.EventTypeWarning, "SigningError", message)
 		util.CertificateSigningRequestSetFailed(csr, "SigningError", message)
-		_, err := util.UpdateOrApplyStatus(ctx, c.certClient, csr, certificatesv1.CertificateFailed, c.fieldManager)
+		_, err := util.UpdateOrApplyStatus(ctx, c.kubeclient, c.certClient, csr, certificatesv1.CertificateFailed, c.fieldManager)
 		return err
 	}
 
 	csr.Status.Certificate = bundle.ChainPEM
-	csr, err = util.UpdateOrApplyStatus(ctx, c.certClient, csr, "", c.fieldManager)
+	csr, err = util.UpdateOrApplyStatus(ctx, c.kubeclient, c.certClient, csr, "", c.fieldManager)
 	if err != nil {
 		message := "Error updating certificate"
 		c.recorder.Eventf(csr, corev1.EventTypeWarning, "SigningError", "%s: %s", message, err)

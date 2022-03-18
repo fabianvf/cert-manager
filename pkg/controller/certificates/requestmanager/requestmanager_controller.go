@@ -34,6 +34,7 @@ import (
 	"k8s.io/client-go/informers"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clusters"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
@@ -162,7 +163,9 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 		log.V(logf.DebugLevel).Info("status.nextPrivateKeySecretName not yet set, waiting for keymanager before processing certificate")
 		return nil
 	}
-	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(*crt.Status.NextPrivateKeySecretName)
+
+	certKey := clusters.ToClusterAwareKey(crt.GetClusterName(), *crt.Status.NextPrivateKeySecretName)
+	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(certKey)
 	if apierrors.IsNotFound(err) {
 		log.V(logf.DebugLevel).Info("nextPrivateKeySecretName Secret resource does not exist, waiting for keymanager to create it before continuing")
 		return nil
@@ -330,7 +333,7 @@ func (c *controller) deleteRequestsNotMatchingSpec(ctx context.Context, crt *cma
 		violations, err := certificates.RequestMatchesSpec(req, crt.Spec)
 
 		// creating client with cluster name of the certificate instead of certificate request.
-		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), req.ClusterName)
 		if err != nil {
 			log.Error(err, "Failed to check if CertificateRequest matches spec, deleting CertificateRequest")
 			if err := cl.CertificateRequests(req.Namespace).Delete(ctx, req.Name, metav1.DeleteOptions{}); err != nil {
@@ -370,6 +373,7 @@ func (c *controller) deleteRequestsNotMatchingSpec(ctx context.Context, crt *cma
 
 func (c *controller) createNewCertificateRequest(ctx context.Context, crt *cmapi.Certificate, pk crypto.Signer, nextRevision int, nextPrivateKeySecretName string) error {
 	log := logf.FromContext(ctx)
+
 	x509CSR, err := pki.GenerateCSR(crt)
 	if err != nil {
 		log.Error(err, "Failed to generate CSR - will not retry")
@@ -395,6 +399,7 @@ func (c *controller) createNewCertificateRequest(ctx context.Context, crt *cmapi
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:       crt.Namespace,
 			GenerateName:    apiutil.DNSSafeShortenTo52Characters(crt.Name) + "-",
+			ClusterName:     crt.GetClusterName(),
 			Annotations:     annotations,
 			Labels:          crt.Labels,
 			OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(crt, certificateGvk)},
@@ -408,7 +413,7 @@ func (c *controller) createNewCertificateRequest(ctx context.Context, crt *cmapi
 		},
 	}
 
-	cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+	cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), crt.GetClusterName())
 	cr, err = cl.CertificateRequests(cr.Namespace).Create(ctx, cr, metav1.CreateOptions{FieldManager: c.fieldManager})
 	if err != nil {
 		c.recorder.Eventf(crt, corev1.EventTypeWarning, reasonRequestFailed, "Failed to create CertificateRequest: "+err.Error())
@@ -416,15 +421,16 @@ func (c *controller) createNewCertificateRequest(ctx context.Context, crt *cmapi
 	}
 
 	c.recorder.Eventf(crt, corev1.EventTypeNormal, reasonRequested, "Created new CertificateRequest resource %q", cr.Name)
-	if err := c.waitForCertificateRequestToExist(cr.Namespace, cr.Name); err != nil {
+	if err := c.waitForCertificateRequestToExist(cr.Namespace, cr.Name, cr.GetClusterName()); err != nil {
 		return fmt.Errorf("failed whilst waiting for CertificateRequest to exist - this may indicate an apiserver running slowly. Request will be retried")
 	}
 	return nil
 }
 
-func (c *controller) waitForCertificateRequestToExist(namespace, name string) error {
+func (c *controller) waitForCertificateRequestToExist(namespace, name, clusterName string) error {
 	return wait.Poll(time.Millisecond*100, time.Second*5, func() (bool, error) {
-		_, err := c.certificateRequestLister.CertificateRequests(namespace).Get(name)
+		certKey := clusters.ToClusterAwareKey(clusterName, name)
+		_, err := c.certificateRequestLister.CertificateRequests(namespace).Get(certKey)
 		if apierrors.IsNotFound(err) {
 			return false, nil
 		}
