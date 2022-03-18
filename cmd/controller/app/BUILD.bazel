@@ -36,6 +36,8 @@ go_library(
         "@io_k8s_apimachinery//pkg/api/resource:go_default_library",
         "@io_k8s_apimachinery//pkg/util/errors:go_default_library",
         "@io_k8s_client_go//kubernetes:go_default_library",
+        "@io_k8s_client_go//kubernetes/typed/coordination/v1:go_default_library",
+        "@io_k8s_client_go//kubernetes/typed/core/v1:go_default_library",
         "@io_k8s_client_go//plugin/pkg/client/auth:go_default_library",
         "@io_k8s_client_go//tools/leaderelection:go_default_library",
         "@io_k8s_client_go//tools/leaderelection/resourcelock:go_default_library",
