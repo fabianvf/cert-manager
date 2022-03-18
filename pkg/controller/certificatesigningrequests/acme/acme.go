@@ -27,6 +27,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/kubernetes"
 	certificatesclient "k8s.io/client-go/kubernetes/typed/certificates/v1"
 	"k8s.io/client-go/tools/record"
 
@@ -58,6 +59,7 @@ type ACME struct {
 	orderLister cmacmelisters.OrderLister
 	acmeClientV cmacmeclientset.AcmeV1Interface
 	certClient  certificatesclient.CertificateSigningRequestInterface
+	kubeclient  kubernetes.Interface
 
 	// fieldManager is the manager name used for the Apply operations.
 	fieldManager string
@@ -84,6 +86,7 @@ func NewACME(ctx *controllerpkg.Context) certificatesigningrequests.Signer {
 		issuerOptions:            ctx.IssuerOptions,
 		orderLister:              ctx.SharedInformerFactory.Acme().V1().Orders().Lister(),
 		acmeClientV:              ctx.CMClient.AcmeV1(),
+		kubeclient:               ctx.Client,
 		certClient:               ctx.Client.CertificatesV1().CertificateSigningRequests(),
 		recorder:                 ctx.Recorder,
 		copiedAnnotationPrefixes: ctx.CertificateOptions.CopiedAnnotationPrefixes,
@@ -108,7 +111,7 @@ func (a *ACME) Sign(ctx context.Context, csr *certificatesv1.CertificateSigningR
 		log.Error(err, message)
 		a.recorder.Event(csr, corev1.EventTypeWarning, "RequestParsingError", message)
 		ctrlutil.CertificateSigningRequestSetFailed(csr, "RequestParsingError", message)
-		_, uerr := ctrlutil.UpdateOrApplyStatus(ctx, a.certClient, csr, certificatesv1.CertificateFailed, a.fieldManager)
+		_, uerr := ctrlutil.UpdateOrApplyStatus(ctx, a.kubeclient, a.certClient, csr, certificatesv1.CertificateFailed, a.fieldManager)
 		return uerr
 	}
 
@@ -121,7 +124,7 @@ func (a *ACME) Sign(ctx context.Context, csr *certificatesv1.CertificateSigningR
 		log.Error(err, message)
 		a.recorder.Event(csr, corev1.EventTypeWarning, "InvalidOrder", message)
 		ctrlutil.CertificateSigningRequestSetFailed(csr, "InvalidOrder", message)
-		_, uerr := ctrlutil.UpdateOrApplyStatus(ctx, a.certClient, csr, certificatesv1.CertificateFailed, a.fieldManager)
+		_, uerr := ctrlutil.UpdateOrApplyStatus(ctx, a.kubeclient, a.certClient, csr, certificatesv1.CertificateFailed, a.fieldManager)
 		return uerr
 	}
 
@@ -133,7 +136,7 @@ func (a *ACME) Sign(ctx context.Context, csr *certificatesv1.CertificateSigningR
 		log.Error(err, message)
 		a.recorder.Event(csr, corev1.EventTypeWarning, "OrderBuildingError", message)
 		ctrlutil.CertificateSigningRequestSetFailed(csr, "OrderBuildingError", message)
-		_, uerr := ctrlutil.UpdateOrApplyStatus(ctx, a.certClient, csr, certificatesv1.CertificateFailed, a.fieldManager)
+		_, uerr := ctrlutil.UpdateOrApplyStatus(ctx, a.kubeclient, a.certClient, csr, certificatesv1.CertificateFailed, a.fieldManager)
 		return uerr
 	}
 
@@ -178,7 +181,7 @@ func (a *ACME) Sign(ctx context.Context, csr *certificatesv1.CertificateSigningR
 
 		a.recorder.Event(csr, corev1.EventTypeWarning, "OrderFailed", message)
 		ctrlutil.CertificateSigningRequestSetFailed(csr, "OrderFailed", message)
-		_, uerr := ctrlutil.UpdateOrApplyStatus(ctx, a.certClient, csr, certificatesv1.CertificateFailed, a.fieldManager)
+		_, uerr := ctrlutil.UpdateOrApplyStatus(ctx, a.kubeclient, a.certClient, csr, certificatesv1.CertificateFailed, a.fieldManager)
 		return uerr
 	}
 
@@ -219,7 +222,7 @@ func (a *ACME) Sign(ctx context.Context, csr *certificatesv1.CertificateSigningR
 	}
 
 	csr.Status.Certificate = order.Status.Certificate
-	csr, err = ctrlutil.UpdateOrApplyStatus(ctx, a.certClient, csr, "", a.fieldManager)
+	csr, err = ctrlutil.UpdateOrApplyStatus(ctx, a.kubeclient, a.certClient, csr, "", a.fieldManager)
 	if err != nil {
 		message := "Error updating certificate"
 		a.recorder.Eventf(csr, corev1.EventTypeWarning, "SigningError", "%s: %s", message, err)
