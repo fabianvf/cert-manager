@@ -20,7 +20,6 @@ import (
 	"context"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/tools/clusters"
 
 	apiutil "github.com/cert-manager/cert-manager/pkg/api/util"
 	v1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -44,7 +43,7 @@ const (
 func (c *CA) Setup(ctx context.Context) error {
 	log := logf.FromContext(ctx, "setup")
 
-	cert, err := kube.SecretTLSCert(ctx, c.secretsLister, c.resourceNamespace, clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), c.issuer.GetSpec().CA.SecretName))
+	cert, err := kube.SecretTLSCert(ctx, c.secretsLister, c.resourceNamespace, c.issuer.GetSpec().CA.SecretName)
 	if err != nil {
 		log.Error(err, "error getting signing CA TLS certificate")
 		s := messageErrorGetKeyPair + err.Error()
