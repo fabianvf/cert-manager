@@ -113,7 +113,7 @@ func (s *SelfSigned) Sign(ctx context.Context, csr *certificatesv1.CertificateSi
 
 	resourceNamespace := s.issuerOptions.ResourceNamespace(issuerObj)
 
-	privatekey, err := kube.SecretTLSKey(ctx, s.secretsLister, resourceNamespace, secretName)
+	privatekey, err := kube.SecretTLSKey(ctx, s.secretsLister, resourceNamespace, secretName, s.kubeClient)
 	if apierrors.IsNotFound(err) {
 		fmt.Println("cannot find secret while signing")
 		message := fmt.Sprintf("Referenced Secret %s/%s not found", resourceNamespace, secretName)

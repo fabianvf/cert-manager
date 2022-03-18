@@ -25,6 +25,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/record"
 
@@ -51,8 +52,9 @@ type SelfSigned struct {
 	issuerOptions controllerpkg.IssuerOptions
 	secretsLister corelisters.SecretLister
 
-	reporter *crutil.Reporter
-	recorder record.EventRecorder
+	reporter   *crutil.Reporter
+	recorder   record.EventRecorder
+	kubeclient kubernetes.Interface
 
 	// Used for testing to get reproducible resulting certificates
 	signingFn signingFn
@@ -73,6 +75,7 @@ func NewSelfSigned(ctx *controllerpkg.Context) certificaterequests.Issuer {
 		secretsLister: ctx.KubeSharedInformerFactory.Core().V1().Secrets().Lister(),
 		reporter:      crutil.NewReporter(ctx.Clock, ctx.Recorder),
 		recorder:      ctx.Recorder,
+		kubeclient:    ctx.Client,
 		signingFn:     pki.SignCertificate,
 	}
 }
@@ -81,7 +84,7 @@ func (s *SelfSigned) Sign(ctx context.Context, cr *cmapi.CertificateRequest, iss
 	log := logf.FromContext(ctx, "sign")
 
 	// Though client calls aren't being made, scoping the context for future use.
-	ctx = context.WithValue(ctx, "clusterName", issuerObj.GetClusterName())
+	ctx = context.WithValue(ctx, "clusterName", cr.GetClusterName())
 
 	resourceNamespace := s.issuerOptions.ResourceNamespace(issuerObj)
 
@@ -97,9 +100,10 @@ func (s *SelfSigned) Sign(ctx context.Context, cr *cmapi.CertificateRequest, iss
 		return nil, nil
 	}
 
-	privatekey, err := kube.SecretTLSKey(ctx, s.secretsLister, cr.Namespace, secretName)
+	privatekey, err := kube.SecretTLSKey(ctx, s.secretsLister, cr.Namespace, secretName, s.kubeclient)
+	fmt.Println(privatekey.Public(), "keyyyyy")
 	if k8sErrors.IsNotFound(err) {
-		fmt.Println("cannot find secret")
+		fmt.Println("cannot find secret not here")
 		message := fmt.Sprintf("Referenced secret %s/%s not found", cr.Namespace, secretName)
 
 		s.reporter.Pending(cr, err, "MissingSecret", message)

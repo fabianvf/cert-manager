@@ -374,6 +374,7 @@ func (c *controller) createNewPrivateKeySecret(ctx context.Context, crt *cmapi.C
 
 	cl := corev1client.NewWithCluster(c.coreClient.CoreV1().RESTClient(), crt.GetClusterName())
 	s, err = cl.Secrets(s.Namespace).Create(ctx, s, metav1.CreateOptions{})
+	fmt.Println("***secretname***", s.GetName())
 	if err != nil {
 		return nil, err
 	}
