@@ -23,6 +23,7 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/clusters"
 
@@ -36,6 +37,12 @@ import (
 // entry with name 'keyName'.
 func SecretTLSKeyRef(ctx context.Context, secretLister corelisters.SecretLister, namespace, name, keyName string) (crypto.Signer, error) {
 	secKey := clusters.ToClusterAwareKey(ctx.Value("clusterName").(string), name)
+
+	list, err := secretLister.List(labels.Everything())
+	for _, l := range list {
+		fmt.Println("****", l.GetName(), l.ClusterName, "****")
+	}
+	fmt.Println("required secret", secKey, name)
 	secret, err := secretLister.Secrets(namespace).Get(secKey)
 	if err != nil {
 		fmt.Println("secret not found!")
