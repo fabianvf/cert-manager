@@ -11,41 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# ---
-# kind: ConfigMap
-# apiVersion: v1
-# metadata:
-#   name: kubeconfig
-#   namespace: cert-manager
-# data:
-#   kubeconfig: |
-#     apiVersion: v1
-#     clusters:
-#     - cluster:
-#         certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURORENDQWh5Z0F3SUJBZ0lCQWpBTkJna3Foa2lHOXcwQkFRc0ZBREFsTVNNd0lRWURWUVFEREJveE9USXUKTVRZNExqRXVPVGt0WTJGQU1UWTBOekk0TnpZMk1UQWVGdzB5TWpBek1UUXhPRFUwTWpGYUZ3MHlNekF6TVRReApPRFUwTWpGYU1DSXhJREFlQmdOVkJBTU1GekU1TWk0eE5qZ3VNUzQ1T1VBeE5qUTNNamczTmpZeE1JSUJJakFOCkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTJzS0RSYmJQUEFEOTkrK1RDT3BSUmgySW5OSEcKMHoyRW1HTmxaYUdOamM3SWphcU5jSEp3VkYvUk9CWUlnZWJFWDh5enRNcFg0SlpUL3dBV0djZjdXaXBnN05NbApqTzBiZEVDRHNrL1F1SlljVXZtWEpLMFlGN1BKMXJlQ1JZaDJOdGIzZklNc0ZDS1RoVlFZMXJtbUxHTFAxSGI0CloyZHBma1hGUDEzM1FFRE1EaVJOUFZZK1d2dTU2MmJ3MGorM0hTNk5TT1pVU1FxdGlTcG5tQTRKa1Yxd2ZlNWEKNUxPNFl6WFRDZVc2a1ZQclhoZGVIZmlCWWdaVVRiZzdrclVvMGtZQlVxNDh5MUZ6WUZGVUpkNVlGa1d2aXlXYwp4NHkvM1hJK2hYOGltRWxvS3RDbENKcEM3N1JZNWlMUUxHbkFPMjI4S0RBSkxRY2lRV1RGbkVSb1VRSURBUUFCCm8zSXdjREFPQmdOVkhROEJBZjhFQkFNQ0JhQXdFd1lEVlIwbEJBd3dDZ1lJS3dZQkJRVUhBd0V3REFZRFZSMFQKQVFIL0JBSXdBREFmQmdOVkhTTUVHREFXZ0JTSzNpbmR1ZW1PZDcreVU0QUwvbk9UUEw3TU9qQWFCZ05WSFJFRQpFekFSZ2dsc2IyTmhiR2h2YzNTSEJNQ29BV013RFFZSktvWklodmNOQVFFTEJRQURnZ0VCQUJNTWhBNm1xZ3k5CnBBcmxBOUVOZEw4QStzZVhxbGdkRTQwekNON2lQc1FrN3JTcTZ4TWVjd3BQVFJNWFlQZ2ZEYUV4VGFsNGRLbGsKR0YrbkxOWDhOWWdLK3JiRFJ1c3prQllZUTlaNzNoSUtrSDl0cWpCbkxxRVpqNWl1WFdtalNiTDRydml0b3NOZwo1dlNqb085ZG5RcmhXakhCL0VQZ1BxRVVrK1RvL09UaytPT0o3bWJKL0MvNFpPZnp0aWFKZ09QL2MxOE4zd01BCnZLVmYrbUJ2OGh4ckhjM2dUUmZWaXY2ZXRhblRNbjhTaHR1a3Z3NlVaTXVnWE1mcW95Y083L3I4YmJ4YzNEVUEKOGNEUHc2dys2MDNhNGNjTGt3OFl2NzdsWldSMk01anl5RWxDSGRVLzRIQjUrWDhNakhEVUcwS2d4ZGx1RDJXVQoxZXROdHpVdmpSaz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KTUlJREJ6Q0NBZStnQXdJQkFnSUJBVEFOQmdrcWhraUc5dzBCQVFzRkFEQWxNU013SVFZRFZRUUREQm94T1RJdQpNVFk0TGpFdU9Ua3RZMkZBTVRZME56STROelkyTVRBZUZ3MHlNakF6TVRReE9EVTBNakZhRncweU16QXpNVFF4Ck9EVTBNakZhTUNVeEl6QWhCZ05WQkFNTUdqRTVNaTR4TmpndU1TNDVPUzFqWVVBeE5qUTNNamczTmpZeE1JSUIKSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXNFZXBqNmx0NWM0ZE1heVNHZ1hNeTFLZwpOclhXWFdlRlFqdDNqMWNLUVZseWtPRk1pcnd5TGd6L2VldGN4alF3NmZlT2RZbW5EODU4NmgxS0ZmQ2VSWmlqCmcxamFRRCtmbVRqWWQzMUxIU2M5eXgwZjk3Z2x5d3JzM2xXbm5YRGY1WGt1VUZMSjZ5YnZDTVk5YmJwZHVubUwKaU4zVkVGYXhNQmNReU9JbkRGbytEeGZBZytRL0VpSU5NVDZkcGQxWTBSc3k5TGt1cjg2NzFRWCtQV2t4N2REVwpEZ2lwZkpsTHB1NUVDb3FkNk5NenlGR3k1Q0xKWk8wWERqdE5tc3hueXZiM2s1VG9WZ2w5akZ6bm9RU0ltSnFwCmtYcXdiLzNvVHZQb0d1L3A1NkNRQTdWa3JTZnRSNFh3TFFUL0FpeDZuR1hsTThVMmVEbTFyS2NRN0x6ZVl3SUQKQVFBQm8wSXdRREFPQmdOVkhROEJBZjhFQkFNQ0FxUXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QWRCZ05WSFE0RQpGZ1FVaXQ0cDNibnBqbmUvc2xPQUMvNXprenkrekRvd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFDOWVtWVNyCnhKbVRZaUl3RmlXMXVNcE5lekNSRVMraXgxZ01nVlJXNFVnRmpEN1lJbFFkUFJlZkJjbWxkOW11SWovL2RZRnEKRFhKVTloN2FvTXFrVEI1Y3VjbmkxSGplek1NVmZBS2poOEFmdjVhVHRnTmhnTm5ybUFVZWt0MkxBSmZ6QklwcApHL0tERkVlRG5JV1J0YllzMERvS3dTV2d4Wmx5QUFGcjVIQW5ZMGtod0hVbVIyRjFPeEJKdXM4b3NtMDV2WTJUCnJoMHNLVCsvaGhJbkt2YnBoR2ZCd2E4bThWZ1FTNnoydzJwU1FEdk5BS3pta1JyU1UrTUxLMFEyZ05QK1VzdVIKdGpCVUxsRkJTZzZsb01sbENBM21xSGdGdjVnajdvYXc5blQ0T2I0T3V0THQrMlhsb0Q1MDI4SWZpKzlHUUNOcgpIbzgzeHNOcVlIZnlxeVk9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
-#         server: https://192.168.1.99:6443/clusters/*
-#       name: cross-cluster
-#     - cluster:
-#         certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURORENDQWh5Z0F3SUJBZ0lCQWpBTkJna3Foa2lHOXcwQkFRc0ZBREFsTVNNd0lRWURWUVFEREJveE9USXUKTVRZNExqRXVPVGt0WTJGQU1UWTBOekk0TnpZMk1UQWVGdzB5TWpBek1UUXhPRFUwTWpGYUZ3MHlNekF6TVRReApPRFUwTWpGYU1DSXhJREFlQmdOVkJBTU1GekU1TWk0eE5qZ3VNUzQ1T1VBeE5qUTNNamczTmpZeE1JSUJJakFOCkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTJzS0RSYmJQUEFEOTkrK1RDT3BSUmgySW5OSEcKMHoyRW1HTmxaYUdOamM3SWphcU5jSEp3VkYvUk9CWUlnZWJFWDh5enRNcFg0SlpUL3dBV0djZjdXaXBnN05NbApqTzBiZEVDRHNrL1F1SlljVXZtWEpLMFlGN1BKMXJlQ1JZaDJOdGIzZklNc0ZDS1RoVlFZMXJtbUxHTFAxSGI0CloyZHBma1hGUDEzM1FFRE1EaVJOUFZZK1d2dTU2MmJ3MGorM0hTNk5TT1pVU1FxdGlTcG5tQTRKa1Yxd2ZlNWEKNUxPNFl6WFRDZVc2a1ZQclhoZGVIZmlCWWdaVVRiZzdrclVvMGtZQlVxNDh5MUZ6WUZGVUpkNVlGa1d2aXlXYwp4NHkvM1hJK2hYOGltRWxvS3RDbENKcEM3N1JZNWlMUUxHbkFPMjI4S0RBSkxRY2lRV1RGbkVSb1VRSURBUUFCCm8zSXdjREFPQmdOVkhROEJBZjhFQkFNQ0JhQXdFd1lEVlIwbEJBd3dDZ1lJS3dZQkJRVUhBd0V3REFZRFZSMFQKQVFIL0JBSXdBREFmQmdOVkhTTUVHREFXZ0JTSzNpbmR1ZW1PZDcreVU0QUwvbk9UUEw3TU9qQWFCZ05WSFJFRQpFekFSZ2dsc2IyTmhiR2h2YzNTSEJNQ29BV013RFFZSktvWklodmNOQVFFTEJRQURnZ0VCQUJNTWhBNm1xZ3k5CnBBcmxBOUVOZEw4QStzZVhxbGdkRTQwekNON2lQc1FrN3JTcTZ4TWVjd3BQVFJNWFlQZ2ZEYUV4VGFsNGRLbGsKR0YrbkxOWDhOWWdLK3JiRFJ1c3prQllZUTlaNzNoSUtrSDl0cWpCbkxxRVpqNWl1WFdtalNiTDRydml0b3NOZwo1dlNqb085ZG5RcmhXakhCL0VQZ1BxRVVrK1RvL09UaytPT0o3bWJKL0MvNFpPZnp0aWFKZ09QL2MxOE4zd01BCnZLVmYrbUJ2OGh4ckhjM2dUUmZWaXY2ZXRhblRNbjhTaHR1a3Z3NlVaTXVnWE1mcW95Y083L3I4YmJ4YzNEVUEKOGNEUHc2dys2MDNhNGNjTGt3OFl2NzdsWldSMk01anl5RWxDSGRVLzRIQjUrWDhNakhEVUcwS2d4ZGx1RDJXVQoxZXROdHpVdmpSaz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KTUlJREJ6Q0NBZStnQXdJQkFnSUJBVEFOQmdrcWhraUc5dzBCQVFzRkFEQWxNU013SVFZRFZRUUREQm94T1RJdQpNVFk0TGpFdU9Ua3RZMkZBTVRZME56STROelkyTVRBZUZ3MHlNakF6TVRReE9EVTBNakZhRncweU16QXpNVFF4Ck9EVTBNakZhTUNVeEl6QWhCZ05WQkFNTUdqRTVNaTR4TmpndU1TNDVPUzFqWVVBeE5qUTNNamczTmpZeE1JSUIKSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXNFZXBqNmx0NWM0ZE1heVNHZ1hNeTFLZwpOclhXWFdlRlFqdDNqMWNLUVZseWtPRk1pcnd5TGd6L2VldGN4alF3NmZlT2RZbW5EODU4NmgxS0ZmQ2VSWmlqCmcxamFRRCtmbVRqWWQzMUxIU2M5eXgwZjk3Z2x5d3JzM2xXbm5YRGY1WGt1VUZMSjZ5YnZDTVk5YmJwZHVubUwKaU4zVkVGYXhNQmNReU9JbkRGbytEeGZBZytRL0VpSU5NVDZkcGQxWTBSc3k5TGt1cjg2NzFRWCtQV2t4N2REVwpEZ2lwZkpsTHB1NUVDb3FkNk5NenlGR3k1Q0xKWk8wWERqdE5tc3hueXZiM2s1VG9WZ2w5akZ6bm9RU0ltSnFwCmtYcXdiLzNvVHZQb0d1L3A1NkNRQTdWa3JTZnRSNFh3TFFUL0FpeDZuR1hsTThVMmVEbTFyS2NRN0x6ZVl3SUQKQVFBQm8wSXdRREFPQmdOVkhROEJBZjhFQkFNQ0FxUXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QWRCZ05WSFE0RQpGZ1FVaXQ0cDNibnBqbmUvc2xPQUMvNXprenkrekRvd0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFDOWVtWVNyCnhKbVRZaUl3RmlXMXVNcE5lekNSRVMraXgxZ01nVlJXNFVnRmpEN1lJbFFkUFJlZkJjbWxkOW11SWovL2RZRnEKRFhKVTloN2FvTXFrVEI1Y3VjbmkxSGplek1NVmZBS2poOEFmdjVhVHRnTmhnTm5ybUFVZWt0MkxBSmZ6QklwcApHL0tERkVlRG5JV1J0YllzMERvS3dTV2d4Wmx5QUFGcjVIQW5ZMGtod0hVbVIyRjFPeEJKdXM4b3NtMDV2WTJUCnJoMHNLVCsvaGhJbkt2YnBoR2ZCd2E4bThWZ1FTNnoydzJwU1FEdk5BS3pta1JyU1UrTUxLMFEyZ05QK1VzdVIKdGpCVUxsRkJTZzZsb01sbENBM21xSGdGdjVnajdvYXc5blQ0T2I0T3V0THQrMlhsb0Q1MDI4SWZpKzlHUUNOcgpIbzgzeHNOcVlIZnlxeVk9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
-#         server: https://192.168.1.99:6443
-#       name: system:admin
-#     contexts:
-#     - context:
-#         cluster: cross-cluster
-#         user: admin
-#       name: cross-cluster
-#     - context:
-#         cluster: system:admin
-#         user: admin
-#       name: system:admin
-#     current-context: system:admin
-#     kind: Config
-#     preferences: {}
-#     users:
-#     - name: admin
-#       user:
-#         token: 158880c3-d6df-4bc2-92d0-71f2738e2bbc
 ---
 apiVersion: v1
 kind: Namespace
@@ -677,7 +642,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: cert-manager-cainjector:leaderelection
-  namespace: kube-system
+  namespace: cert-manager
   labels:
     app: cainjector
     app.kubernetes.io/name: cainjector
@@ -711,7 +676,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: cert-manager:leaderelection
-  namespace: kube-system
+  namespace: cert-manager
   labels:
     app: cert-manager
     app.kubernetes.io/name: cert-manager
@@ -766,7 +731,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: cert-manager-cainjector:leaderelection
-  namespace: kube-system
+  namespace: cert-manager
   labels:
     app: cainjector
     app.kubernetes.io/name: cainjector
@@ -789,7 +754,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: cert-manager:leaderelection
-  namespace: kube-system
+  namespace: cert-manager
   labels:
     app: cert-manager
     app.kubernetes.io/name: cert-manager
@@ -805,28 +770,6 @@ subjects:
     kind: ServiceAccount
     name: cert-manager
     namespace: cert-manager
----
-# Source: cert-manager/templates/webhook-rbac.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: cert-manager-webhook:dynamic-serving
-  namespace: "cert-manager"
-  labels:
-    app: webhook
-    app.kubernetes.io/name: webhook
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "webhook"
-    app.kubernetes.io/version: "v1.7.1"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: cert-manager-webhook:dynamic-serving
-subjects:
-- apiGroup: ""
-  kind: ServiceAccount
-  name: cert-manager-webhook
-  namespace: cert-manager
 ---
 # Source: cert-manager/templates/service.yaml
 apiVersion: v1
@@ -851,83 +794,6 @@ spec:
     app.kubernetes.io/name: cert-manager
     app.kubernetes.io/instance: cert-manager
     app.kubernetes.io/component: "controller"
----
-# Source: cert-manager/templates/webhook-service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: cert-manager-webhook
-  namespace: "cert-manager"
-  labels:
-    app: webhook
-    app.kubernetes.io/name: webhook
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "webhook"
-    app.kubernetes.io/version: "v1.7.1"
-spec:
-  type: ClusterIP
-  ports:
-  - name: https
-    port: 443
-    protocol: TCP
-    targetPort: "https"
-  selector:
-    app.kubernetes.io/name: webhook
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "webhook"
----
-# Source: cert-manager/templates/cainjector-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cert-manager-cainjector
-  namespace: "cert-manager"
-  labels:
-    app: cainjector
-    app.kubernetes.io/name: cainjector
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "cainjector"
-    app.kubernetes.io/version: "v1.7.1"
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: cainjector
-      app.kubernetes.io/instance: cert-manager
-      app.kubernetes.io/component: "cainjector"
-  template:
-    metadata:
-      labels:
-        app: cainjector
-        app.kubernetes.io/name: cainjector
-        app.kubernetes.io/instance: cert-manager
-        app.kubernetes.io/component: "cainjector"
-        app.kubernetes.io/version: "v1.7.1"
-    spec:
-      serviceAccountName: cert-manager-cainjector
-      securityContext:
-        runAsNonRoot: true
-      volumes:
-        - name: kubeconfig
-          configMap:
-            name: kubeconfig
-      containers:
-        - name: cert-manager
-          image: "docker.io/fabianvf/cert-manager-cainjector:v1.7.0-beta.0.150-f554a48dfa678a-dirty"
-          imagePullPolicy: IfNotPresent
-          args:
-          - --v=2
-          - --leader-election-namespace=kube-system
-          volumeMounts:
-            - name: kubeconfig
-              mountPath: /kubeconfig
-          env:
-          - name: KUBECONFIG
-            value: /kubeconfig
-          - name: POD_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
 ---
 # Source: cert-manager/templates/deployment.yaml
 apiVersion: apps/v1
@@ -971,194 +837,23 @@ spec:
             name: kubeconfig
       containers:
         - name: cert-manager
-          image: "docker.io/fabianvf/cert-manager-controller:v1.7.0-beta.0.150-f554a48dfa678a-dirty"
-          imagePullPolicy: IfNotPresent
+          image: "docker.io/fabianvf/cert-manager-controller:v1.7.0-beta.0.152-e5095b6492a694-dirty"
+          imagePullPolicy: Always
           volumeMounts:
           - name: kubeconfig
             mountPath: /kubeconfig
           args:
-          - --v=2
+          - --v=8
           - --cluster-resource-namespace=$(POD_NAMESPACE)
-          - --leader-election-namespace=kube-system
+          - --leader-elect=false
+          - --kubeconfig=/kubeconfig/kubeconfig
           ports:
           - containerPort: 9402
             protocol: TCP
           env:
           - name: KUBECONFIG
-            value: /kubeconfig
+            value: /kubeconfig/kubeconfig
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
----
-# Source: cert-manager/templates/webhook-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cert-manager-webhook
-  namespace: "cert-manager"
-  labels:
-    app: webhook
-    app.kubernetes.io/name: webhook
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "webhook"
-    app.kubernetes.io/version: "v1.7.1"
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: webhook
-      app.kubernetes.io/instance: cert-manager
-      app.kubernetes.io/component: "webhook"
-  template:
-    metadata:
-      labels:
-        app: webhook
-        app.kubernetes.io/name: webhook
-        app.kubernetes.io/instance: cert-manager
-        app.kubernetes.io/component: "webhook"
-        app.kubernetes.io/version: "v1.7.1"
-    spec:
-      serviceAccountName: cert-manager-webhook
-      securityContext:
-        runAsNonRoot: true
-
-      volumes:
-        - name: kubeconfig
-          configMap:
-            name: kubeconfig
-      containers:
-        - name: cert-manager
-          image: "docker.io/fabianvf/cert-manager-webhook:v1.7.0-beta.0.150-f554a48dfa678a-dirty"
-          imagePullPolicy: IfNotPresent
-          volumeMounts:
-          - name: kubeconfig
-            mountPath: /kubeconfig
-          args:
-          - --v=2
-          - --secure-port=10250
-          - --dynamic-serving-ca-secret-namespace=$(POD_NAMESPACE)
-          - --dynamic-serving-ca-secret-name=cert-manager-webhook-ca
-          - --dynamic-serving-dns-names=cert-manager-webhook,cert-manager-webhook.cert-manager,cert-manager-webhook.cert-manager.svc
-          ports:
-          - name: https
-            protocol: TCP
-            containerPort: 10250
-          livenessProbe:
-            httpGet:
-              path: /livez
-              port: 6080
-              scheme: HTTP
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 1
-            successThreshold: 1
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 6080
-              scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 1
-            successThreshold: 1
-            failureThreshold: 3
-          env:
-          - name: KUBECONFIG
-            value: /kubeconfig
-          - name: POD_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
----
-# Source: cert-manager/templates/webhook-mutating-webhook.yaml
-apiVersion: admissionregistration.k8s.io/v1
-kind: MutatingWebhookConfiguration
-metadata:
-  name: cert-manager-webhook
-  labels:
-    app: webhook
-    app.kubernetes.io/name: webhook
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "webhook"
-    app.kubernetes.io/version: "v1.7.1"
-  annotations:
-    cert-manager.io/inject-ca-from-secret: "cert-manager/cert-manager-webhook-ca"
-webhooks:
-  - name: webhook.cert-manager.io
-    rules:
-      - apiGroups:
-          - "cert-manager.io"
-          - "acme.cert-manager.io"
-        apiVersions:
-          - "v1"
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - "*/*"
-    admissionReviewVersions: ["v1"]
-    # This webhook only accepts v1 cert-manager resources.
-    # Equivalent matchPolicy ensures that non-v1 resource requests are sent to
-    # this webhook (after the resources have been converted to v1).
-    matchPolicy: Equivalent
-    timeoutSeconds: 10
-    failurePolicy: Fail
-    # Only include 'sideEffects' field in Kubernetes 1.12+
-    sideEffects: None
-    clientConfig:
-      service:
-        name: cert-manager-webhook
-        namespace: "cert-manager"
-        path: /mutate
----
-# Source: cert-manager/templates/webhook-validating-webhook.yaml
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingWebhookConfiguration
-metadata:
-  name: cert-manager-webhook
-  labels:
-    app: webhook
-    app.kubernetes.io/name: webhook
-    app.kubernetes.io/instance: cert-manager
-    app.kubernetes.io/component: "webhook"
-    app.kubernetes.io/version: "v1.7.1"
-  annotations:
-    cert-manager.io/inject-ca-from-secret: "cert-manager/cert-manager-webhook-ca"
-webhooks:
-  - name: webhook.cert-manager.io
-    namespaceSelector:
-      matchExpressions:
-      - key: "cert-manager.io/disable-validation"
-        operator: "NotIn"
-        values:
-        - "true"
-      - key: "name"
-        operator: "NotIn"
-        values:
-        - cert-manager
-    rules:
-      - apiGroups:
-          - "cert-manager.io"
-          - "acme.cert-manager.io"
-        apiVersions:
-          - "v1"
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - "*/*"
-    admissionReviewVersions: ["v1"]
-    # This webhook only accepts v1 cert-manager resources.
-    # Equivalent matchPolicy ensures that non-v1 resource requests are sent to
-    # this webhook (after the resources have been converted to v1).
-    matchPolicy: Equivalent
-    timeoutSeconds: 10
-    failurePolicy: Fail
-    sideEffects: None
-    clientConfig:
-      service:
-        name: cert-manager-webhook
-        namespace: "cert-manager"
-        path: /validate
