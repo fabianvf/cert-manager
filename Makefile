@@ -16,7 +16,7 @@
 ###############
 
 # Set DOCKER_REGISTRY to customise the image docker repo, e.g. "quay.io/jetstack"
-DOCKER_REGISTRY := docker.io/fabianvf
+DOCKER_REGISTRY := docker.io/varshaprasadnarsing
 # Set APP_VERSION to customize the image tag, eg "v0.0.5-dev"
 APP_VERSION :=
 # Set the target platform to build for. Defaults to linux/amd64
