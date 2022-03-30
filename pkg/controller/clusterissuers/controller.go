@@ -150,6 +150,10 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	ctx = logf.NewContext(ctx, logf.WithResource(log, issuer))
+
+	// Pass cluster scoped context to sync
+	ctx = context.WithValue(ctx, "clusterName", issuer.GetClusterName())
+
 	return c.Sync(ctx, issuer)
 }
 

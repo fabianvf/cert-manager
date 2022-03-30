@@ -31,6 +31,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clusters"
+
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/utils/clock"
@@ -42,6 +44,7 @@ import (
 	cmapi "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 	cmclient "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned"
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 	cminformers "github.com/cert-manager/cert-manager/pkg/client/informers/externalversions"
 	cmlisters "github.com/cert-manager/cert-manager/pkg/client/listers/certmanager/v1"
 	controllerpkg "github.com/cert-manager/cert-manager/pkg/controller"
@@ -52,6 +55,7 @@ import (
 	utilkube "github.com/cert-manager/cert-manager/pkg/util/kube"
 	utilpki "github.com/cert-manager/cert-manager/pkg/util/pki"
 	"github.com/cert-manager/cert-manager/pkg/util/predicate"
+	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
@@ -70,7 +74,8 @@ type controller struct {
 	recorder                 record.EventRecorder
 	clock                    clock.Clock
 
-	client cmclient.Interface
+	client     cmclient.Interface
+	kubeclient kubernetes.Interface
 
 	// secretsUpdateData is used by the SecretTemplate controller for
 	// re-reconciling Secrets where the SecretTemplate is not up to date with a
@@ -134,16 +139,14 @@ func NewController(
 		certificateInformer.Informer().HasSynced,
 	}
 
-	secretsManager := internal.NewSecretsManager(
-		kubeClient.CoreV1(), secretsInformer.Lister(),
-		fieldManager, certificateControllerOptions.EnableOwnerRef,
-	)
+	secretsManager := internal.NewSecretsManager(kubeClient.CoreV1(), secretsInformer.Lister(), fieldManager, certificateControllerOptions.EnableOwnerRef, kubeClient)
 
 	return &controller{
 		certificateLister:        certificateInformer.Lister(),
 		certificateRequestLister: certificateRequestInformer.Lister(),
 		secretLister:             secretsInformer.Lister(),
 		client:                   client,
+		kubeclient:               kubeClient,
 		recorder:                 recorder,
 		clock:                    clock,
 		secretsUpdateData:        secretsManager.UpdateData,
@@ -176,6 +179,7 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 
 	log = logf.WithResource(log, crt)
 	ctx = logf.NewContext(ctx, log)
+	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
 
 	if !apiutil.CertificateHasCondition(crt, cmapi.CertificateCondition{
 		Type:   cmapi.CertificateConditionIssuing,
@@ -194,11 +198,16 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	}
 
 	// Fetch and parse the 'next private key secret'
-	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(*crt.Status.NextPrivateKeySecretName)
+	crtKey := clusters.ToClusterAwareKey(crt.GetClusterName(), *crt.Status.NextPrivateKeySecretName)
+	nextPrivateKeySecret, err := c.secretLister.Secrets(crt.Namespace).Get(crtKey)
 	if apierrors.IsNotFound(err) {
-		log.V(logf.DebugLevel).Info("Next private key secret does not exist, waiting for keymanager controller")
-		// If secret does not exist, do nothing (keymanager will handle this).
-		return nil
+		cl := corev1client.NewWithCluster(c.kubeclient.CoreV1().RESTClient(), crt.GetClusterName())
+		nextPrivateKeySecret, err = cl.Secrets(crt.Namespace).Get(ctx, *crt.Status.NextPrivateKeySecretName, metav1.GetOptions{})
+		if err != nil {
+			log.V(logf.DebugLevel).Info("Next private key secret does not exist, waiting for keymanager controller")
+			// If secret does not exist, do nothing (keymanager will handle this).
+			return nil
+		}
 	}
 	if err != nil {
 		return err
@@ -433,7 +442,8 @@ func (c *controller) updateOrApplyStatus(ctx context.Context, crt *cmapi.Certifi
 			},
 		})
 	} else {
-		_, err := c.client.CertmanagerV1().Certificates(crt.Namespace).UpdateStatus(ctx, crt, metav1.UpdateOptions{})
+		client := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+		_, err := client.Certificates(crt.Namespace).UpdateStatus(ctx, crt, metav1.UpdateOptions{})
 		return err
 	}
 }

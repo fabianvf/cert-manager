@@ -45,6 +45,8 @@ import (
 	"github.com/cert-manager/cert-manager/pkg/metrics"
 	utilfeature "github.com/cert-manager/cert-manager/pkg/util/feature"
 	"github.com/cert-manager/cert-manager/pkg/util/profiling"
+	coordinationv1 "k8s.io/client-go/kubernetes/typed/coordination/v1"
+	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 func Run(opts *options.ControllerOptions, stopCh <-chan struct{}) error {
@@ -334,11 +336,14 @@ func startLeaderElection(ctx context.Context, opts *options.ControllerOptions, l
 		Identity:      id + "-external-cert-manager-controller",
 		EventRecorder: recorder,
 	}
+	// TODO(kcp): Hardcoded to admin cluster for now. Figure out what is to be done later.
+	corev1cl := corev1client.NewWithCluster(leaderElectionClient.CoreV1().RESTClient(), "admin")
+	coordinationv1cl := coordinationv1.NewWithCluster(leaderElectionClient.CoordinationV1().RESTClient(), "admin")
 	ml, err := resourcelock.New(resourcelock.ConfigMapsLeasesResourceLock,
 		opts.LeaderElectionNamespace,
 		lockName,
-		leaderElectionClient.CoreV1(),
-		leaderElectionClient.CoordinationV1(),
+		corev1cl,
+		coordinationv1cl,
 		lc,
 	)
 	if err != nil {

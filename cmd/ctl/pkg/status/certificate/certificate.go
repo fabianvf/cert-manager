@@ -150,6 +150,7 @@ func (o *Options) GetResources(ctx context.Context, crtName string) (*Data, erro
 	if err != nil {
 		return nil, err
 	}
+
 	// If no events found, crtEvents would be nil and handled down the line in DescribeEvents
 	crtEvents, err := clientSet.CoreV1().Events(crt.Namespace).Search(ctl.Scheme, crtRef)
 	if err != nil {

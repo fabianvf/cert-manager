@@ -19,6 +19,7 @@ package approver
 import (
 	"context"
 
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -79,7 +80,8 @@ func (c *Controller) updateStatusOrApply(ctx context.Context, cr *cmapi.Certific
 	if utilfeature.DefaultFeatureGate.Enabled(feature.ServerSideApply) {
 		return internalcertificaterequests.ApplyStatus(ctx, c.cmClient, c.fieldManager, cr)
 	} else {
-		_, err := c.cmClient.CertmanagerV1().CertificateRequests(cr.Namespace).UpdateStatus(ctx, cr, metav1.UpdateOptions{})
+		cl := certmanagerv1.NewWithCluster(c.cmClient.CertmanagerV1().RESTClient(), cr.GetClusterName())
+		_, err := cl.CertificateRequests(cr.Namespace).UpdateStatus(ctx, cr, metav1.UpdateOptions{})
 		return err
 	}
 }

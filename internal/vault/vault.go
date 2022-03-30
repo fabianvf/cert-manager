@@ -118,6 +118,7 @@ func (v *Vault) Sign(csrPEM []byte, duration time.Duration) (cert []byte, ca []b
 		"exclude_cn_from_sans": "true",
 	}
 
+	// TODO(kcp): Later: since a post request is being sent, verify if we need to send the clusterName
 	vaultIssuer := v.issuer.GetSpec().Vault
 	url := path.Join("/v1", vaultIssuer.Path)
 

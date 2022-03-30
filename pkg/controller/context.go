@@ -64,6 +64,7 @@ const resyncPeriod = 10 * time.Hour
 // Each component should be given distinct Contexts, built from the
 // ContextFactory that has configured the underlying client to use separate
 // User Agents.
+// TODO(kcp): Pass cluster interface for certmanager and k8s client
 type Context struct {
 	// RootContext is the root context for the controller
 	RootContext context.Context
@@ -313,6 +314,7 @@ func (c *ContextFactory) Build(component ...string) (*Context, error) {
 }
 
 // contextClients is a helper struct containing API clients.
+// TODO(kcp): Propagate cluster interfaces here too.
 type contextClients struct {
 	kubeClient       kubernetes.Interface
 	cmClient         clientset.Interface
@@ -324,13 +326,13 @@ type contextClients struct {
 // REST config.
 func buildClients(restConfig *rest.Config) (contextClients, error) {
 	// Create a cert-manager api client
-	cmClient, err := clientset.NewForConfig(restConfig)
+	cmClient, err := clientset.NewClusterForConfig(restConfig)
 	if err != nil {
 		return contextClients{}, fmt.Errorf("error creating internal group client: %w", err)
 	}
 
 	// Create a Kubernetes api client
-	kubeClient, err := kubernetes.NewForConfig(restConfig)
+	kubeClient, err := kubernetes.NewClusterForConfig(restConfig)
 	if err != nil {
 		return contextClients{}, fmt.Errorf("error creating kubernetes client: %w", err)
 	}
@@ -340,7 +342,7 @@ func buildClients(restConfig *rest.Config) (contextClients, error) {
 	if utilfeature.DefaultFeatureGate.Enabled(feature.ExperimentalGatewayAPISupport) {
 		// Check if the gateway API CRDs are available. If they are not found
 		// return an error which will cause cert-manager to crashloopbackoff.
-		d := kubeClient.Discovery()
+		d := kubeClient.Cluster("*").Discovery()
 		resources, err := d.ServerResourcesForGroupVersion(gwapi.GroupVersion.String())
 		var GatewayAPINotAvailable = "the Gateway API CRDs do not seem to be present, but " + feature.ExperimentalGatewayAPISupport +
 			" is set to true. Please install the gateway-api CRDs."
@@ -362,5 +364,6 @@ func buildClients(restConfig *rest.Config) (contextClients, error) {
 		return contextClients{}, fmt.Errorf("error creating kubernetes client: %w", err)
 	}
 
-	return contextClients{kubeClient, cmClient, gwClient, gatewayAvailable}, nil
+	// TODO(kcp): Verify if gateway client needs to be scoped
+	return contextClients{kubeClient.Cluster("*"), cmClient.Cluster("*"), gwClient, gatewayAvailable}, nil
 }

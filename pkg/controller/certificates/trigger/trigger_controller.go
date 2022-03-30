@@ -39,6 +39,7 @@ import (
 	cmapi "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 	cmclient "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned"
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 	cminformers "github.com/cert-manager/cert-manager/pkg/client/informers/externalversions"
 	cmlisters "github.com/cert-manager/cert-manager/pkg/client/listers/certmanager/v1"
 	controllerpkg "github.com/cert-manager/cert-manager/pkg/controller"
@@ -56,6 +57,7 @@ const ControllerName = "certificates-trigger"
 // determine whether a re-issuance is required.
 // It triggers re-issuance by adding the `Issuing` status condition when a new
 // certificate is required.
+// TODO: instead of passing cmclient.Interface, pass cmclient.Cluster
 type controller struct {
 	certificateLister        cmlisters.CertificateLister
 	certificateRequestLister cmlisters.CertificateRequestLister
@@ -150,6 +152,9 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 	if err != nil {
 		return err
 	}
+
+	ctx = context.WithValue(ctx, "clusterName", crt.GetClusterName())
+
 	if apiutil.CertificateHasCondition(crt, cmapi.CertificateCondition{
 		Type:   cmapi.CertificateConditionIssuing,
 		Status: cmmeta.ConditionTrue,
@@ -203,6 +208,7 @@ func (c *controller) ProcessItem(ctx context.Context, key string) error {
 // updateOrApplyStatus will update the controller status. If the
 // ServerSideApply feature is enabled, the managed fields will instead get
 // applied using the relevant Patch API call.
+// TODO(kcp): modify the client calls to cluster instead
 func (c *controller) updateOrApplyStatus(ctx context.Context, crt *cmapi.Certificate) error {
 	if utilfeature.DefaultFeatureGate.Enabled(feature.ServerSideApply) {
 		var conditions []cmapi.CertificateCondition
@@ -214,7 +220,8 @@ func (c *controller) updateOrApplyStatus(ctx context.Context, crt *cmapi.Certifi
 			Status:     cmapi.CertificateStatus{Conditions: conditions},
 		})
 	} else {
-		_, err := c.client.CertmanagerV1().Certificates(crt.Namespace).UpdateStatus(ctx, crt, metav1.UpdateOptions{})
+		cl := certmanagerv1.NewWithCluster(c.client.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+		_, err := cl.Certificates(crt.Namespace).UpdateStatus(ctx, crt, metav1.UpdateOptions{})
 		return err
 	}
 }

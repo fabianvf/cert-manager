@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clusters"
 	"k8s.io/client-go/util/workqueue"
 
 	logf "github.com/cert-manager/cert-manager/pkg/logs"
@@ -75,7 +76,7 @@ func HandleOwnedResourceNamespacedFunc(log logr.Logger, queue workqueue.RateLimi
 			}
 
 			if refGV.Group == ownerGVK.Group && ref.Kind == ownerGVK.Kind {
-				obj, err := get(metaobj.GetNamespace(), ref.Name)
+				obj, err := get(metaobj.GetNamespace(), clusters.ToClusterAwareKey(metaobj.GetClusterName(), ref.Name))
 				// This function is always called with a getter
 				// that gets from informers cache. Because this
 				// is also called on cache sync it may be that

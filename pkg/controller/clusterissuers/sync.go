@@ -28,6 +28,7 @@ import (
 	"github.com/cert-manager/cert-manager/internal/controller/feature"
 	internalissuers "github.com/cert-manager/cert-manager/internal/controller/issuers"
 	cmapi "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	certmanagerv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 	logf "github.com/cert-manager/cert-manager/pkg/logs"
 	utilfeature "github.com/cert-manager/cert-manager/pkg/util/feature"
 )
@@ -75,7 +76,8 @@ func (c *controller) updateIssuerStatus(ctx context.Context, old, new *cmapi.Clu
 	if utilfeature.DefaultFeatureGate.Enabled(feature.ServerSideApply) {
 		return internalissuers.ApplyClusterIssuerStatus(ctx, c.cmClient, c.fieldManager, new)
 	} else {
-		_, err := c.cmClient.CertmanagerV1().ClusterIssuers().UpdateStatus(ctx, new, metav1.UpdateOptions{})
+		client := certmanagerv1.NewWithCluster(c.cmClient.CertmanagerV1().RESTClient(), ctx.Value("clusterName").(string))
+		_, err := client.ClusterIssuers().UpdateStatus(ctx, new, metav1.UpdateOptions{})
 		return err
 	}
 }

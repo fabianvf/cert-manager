@@ -37,6 +37,7 @@ type CertmanagerV1Interface interface {
 // CertmanagerV1Client is used to interact with features provided by the cert-manager.io group.
 type CertmanagerV1Client struct {
 	restClient rest.Interface
+	cluster    string
 }
 
 func (c *CertmanagerV1Client) Certificates(namespace string) CertificateInterface {
@@ -81,7 +82,7 @@ func NewForConfigAndClient(c *rest.Config, h *http.Client) (*CertmanagerV1Client
 	if err != nil {
 		return nil, err
 	}
-	return &CertmanagerV1Client{client}, nil
+	return &CertmanagerV1Client{restClient: client}, nil
 }
 
 // NewForConfigOrDie creates a new CertmanagerV1Client for the given config and
@@ -96,7 +97,12 @@ func NewForConfigOrDie(c *rest.Config) *CertmanagerV1Client {
 
 // New creates a new CertmanagerV1Client for the given RESTClient.
 func New(c rest.Interface) *CertmanagerV1Client {
-	return &CertmanagerV1Client{c}
+	return &CertmanagerV1Client{restClient: c}
+}
+
+// NewWithCluster creates a new CertmanagerV1Client for the given RESTClient and cluster.
+func NewWithCluster(c rest.Interface, cluster string) *CertmanagerV1Client {
+	return &CertmanagerV1Client{restClient: c, cluster: cluster}
 }
 
 func setConfigDefaults(config *rest.Config) error {

@@ -52,7 +52,7 @@ func (c *CA) Setup(ctx context.Context) error {
 		return err
 	}
 
-	_, err = kube.SecretTLSKey(ctx, c.secretsLister, c.resourceNamespace, c.issuer.GetSpec().CA.SecretName)
+	_, err = kube.SecretTLSKey(ctx, c.secretsLister, c.resourceNamespace, c.issuer.GetSpec().CA.SecretName, c.Client)
 	if err != nil {
 		log.Error(err, "error getting signing CA private key")
 		s := messageErrorGetKeyPair + err.Error()

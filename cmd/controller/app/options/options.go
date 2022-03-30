@@ -29,10 +29,8 @@ import (
 	cmdutil "github.com/cert-manager/cert-manager/cmd/util"
 	"github.com/cert-manager/cert-manager/internal/controller/feature"
 	cm "github.com/cert-manager/cert-manager/pkg/apis/certmanager"
-	challengescontroller "github.com/cert-manager/cert-manager/pkg/controller/acmechallenges"
 	orderscontroller "github.com/cert-manager/cert-manager/pkg/controller/acmeorders"
 	shimgatewaycontroller "github.com/cert-manager/cert-manager/pkg/controller/certificate-shim/gateways"
-	shimingresscontroller "github.com/cert-manager/cert-manager/pkg/controller/certificate-shim/ingresses"
 	cracmecontroller "github.com/cert-manager/cert-manager/pkg/controller/certificaterequests/acme"
 	crapprovercontroller "github.com/cert-manager/cert-manager/pkg/controller/certificaterequests/approver"
 	crcacontroller "github.com/cert-manager/cert-manager/pkg/controller/certificaterequests/ca"
@@ -158,10 +156,10 @@ var (
 		issuerscontroller.ControllerName,
 		clusterissuerscontroller.ControllerName,
 		certificatesmetricscontroller.ControllerName,
-		shimingresscontroller.ControllerName,
-		shimgatewaycontroller.ControllerName,
+		// shimingresscontroller.ControllerName,
+		// shimgatewaycontroller.ControllerName,
 		orderscontroller.ControllerName,
-		challengescontroller.ControllerName,
+		// challengescontroller.ControllerName,
 		cracmecontroller.CRControllerName,
 		crapprovercontroller.ControllerName,
 		crcacontroller.CRControllerName,
@@ -181,9 +179,9 @@ var (
 		issuerscontroller.ControllerName,
 		clusterissuerscontroller.ControllerName,
 		certificatesmetricscontroller.ControllerName,
-		shimingresscontroller.ControllerName,
+		// shimingresscontroller.ControllerName,
 		orderscontroller.ControllerName,
-		challengescontroller.ControllerName,
+		// challengescontroller.ControllerName,
 		cracmecontroller.CRControllerName,
 		crapprovercontroller.ControllerName,
 		crcacontroller.CRControllerName,

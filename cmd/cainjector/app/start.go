@@ -145,6 +145,7 @@ func (o InjectorControllerOptions) RunInjectorController(ctx context.Context) er
 		RenewDeadline:                 &o.RenewDeadline,
 		RetryPeriod:                   &o.RetryPeriod,
 		MetricsBindAddress:            "0",
+		// NewCache:                      cache.MultiClusterCacheBuilder([]string{"*"}),
 	})
 	if err != nil {
 		return fmt.Errorf("error creating manager: %v", err)

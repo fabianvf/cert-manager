@@ -83,6 +83,10 @@ func (c *CA) Sign(ctx context.Context, cr *cmapi.CertificateRequest, issuerObj c
 	secretName := issuerObj.GetSpec().CA.SecretName
 	resourceNamespace := c.issuerOptions.ResourceNamespace(issuerObj)
 
+	// Though client scoped calls are not used here, making the context cluster scoped
+	// for future use.
+	ctx = context.WithValue(ctx, "clusterName", cr.GetClusterName())
+
 	// get a copy of the CA certificate named on the Issuer
 	caCerts, caKey, err := kube.SecretTLSKeyPairAndCA(ctx, c.secretsLister, resourceNamespace, issuerObj.GetSpec().CA.SecretName)
 	if k8sErrors.IsNotFound(err) {

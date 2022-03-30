@@ -17,6 +17,8 @@ limitations under the License.
 package listers
 
 import (
+	"context"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	clientcorev1 "k8s.io/client-go/listers/core/v1"
@@ -69,7 +71,15 @@ func (f *FakeSecretLister) Secrets(namespace string) clientcorev1.SecretNamespac
 	return f.SecretsFn(namespace)
 }
 
+func (f *FakeSecretLister) ListWithContext(ctx context.Context, selector labels.Selector) (ret []*corev1.Secret, err error) {
+	return f.ListFn(selector)
+}
+
 func (f *FakeSecretNamespaceLister) List(selector labels.Selector) (ret []*corev1.Secret, err error) {
+	return f.ListFn(selector)
+}
+
+func (f *FakeSecretNamespaceLister) ListWithContext(ctx context.Context, selector labels.Selector) (ret []*corev1.Secret, err error) {
 	return f.ListFn(selector)
 }
 

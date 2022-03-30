@@ -140,7 +140,9 @@ func (c *controller) worker(ctx context.Context) {
 		if shutdown {
 			break
 		}
-
+		fmt.Println("*******************************")
+		fmt.Println(obj)
+		fmt.Println("*******************************")
 		var key string
 		// use an inlined function so we can use defer
 		func() {

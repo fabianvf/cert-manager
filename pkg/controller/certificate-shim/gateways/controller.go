@@ -25,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clusters"
 	"k8s.io/client-go/util/workqueue"
 	gwlisters "sigs.k8s.io/gateway-api/pkg/client/listers/apis/v1alpha1"
 
@@ -144,7 +145,7 @@ func certificateHandler(queue workqueue.RateLimitingInterface) func(obj interfac
 			return
 		}
 
-		queue.Add(crt.Namespace + "/" + ref.Name)
+		queue.Add(crt.Namespace + "/" + clusters.ToClusterAwareKey(crt.GetClusterName(), ref.Name))
 	}
 }
 
